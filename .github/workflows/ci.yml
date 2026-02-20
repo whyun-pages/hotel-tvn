@@ -43,6 +43,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
+          pnpm exec playwright install
 
       - name: Start
         run: |
