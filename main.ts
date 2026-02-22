@@ -36,7 +36,7 @@ const provinces = ENV.PROVINCES?.split(',') || [
   '四川',
   '云南',
   '重庆',
-  '广州',
+  '广东',
   '陕西',
   '广西',
   '黑龙江',
@@ -47,28 +47,25 @@ const provinces = ENV.PROVINCES?.split(',') || [
   '山东',
   '北京',
   '天津',
+  '河南',
+  '湖南',
+  '湖北',
+  '安徽',
+  '江西',
+  '福建',
+  '浙江',
+  '上海',
+  '江苏',
+  '贵州',
+  '甘肃',
+  '青海',
+  '宁夏',
+  '新疆',
+  '西藏',
+  '海南',
 ];
 const urls: RegionUrl[] = [
-  // genUrlByRegion('四川'),
-  // genUrlByRegion('云南'),
-  // genUrlByRegion('重庆'),
-  // genUrlByRegion('广州'),
-  // genUrlByRegion('陕西'),
-  // genUrlByRegion('广西'),
-  // genUrlByRegion('黑龙江'),
-  // genUrlByRegion('吉林'),
-  // genUrlByRegion('辽宁'),
-  // genUrlByRegion('内蒙古'),
-  // genUrlByRegion('河北'),
-  // genUrlByRegion('山东'),
   ...provinces.map((region) => ({region, url: genUrlByRegion(region)})),
-
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iU2ljaHVhbiI%3D",// 四川
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0i5LqR5Y2XIg%3D%3D",// 云南
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iQ2hvbmdxaW5nIg%3D%3D",// 重庆
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iR3VpemhvdSI%3D",// 广州
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iU2hhbnhpIg%3D%3D",// 陕西
-  // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iR3Vhbmd4aSBaaHVhbmd6dSI%3D",//广西
 ];
 
 const CONCURRENCY = 60;
@@ -191,6 +188,7 @@ async function getValidJsonUrls(): Promise<string[]> {
     for (const r of results) {
       if (r.status === 'fulfilled' && r.value) {
         allValid.push(r.value);
+        console.log(`Found valid JSON: ${r.value} in region: ${region}`);
       }
     }
   }
