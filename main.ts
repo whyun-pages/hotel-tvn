@@ -87,6 +87,9 @@ async function fetchPageWithPlaywright(url: string): Promise<string> {
 function extractIPs(html: string): string[] {
   const $ = cheerio.load(html);
   const text = $.text();
+  if ($('.errorpage').length > 0) {
+    console.warn($('.errorpage').text());
+  }
   const ipRegex = /http:\/\/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d+/g;
   const matches = [...new Set(text.match(ipRegex) || [])];
   return matches;
@@ -147,7 +150,7 @@ async function getValidJsonUrls(): Promise<string[]> {
 
     const ipUrls = extractIPs(html);
     if (ipUrls.length === 0) {
-      console.log(`No valid IPs found in region: ${region}`, html);
+      console.log(`No valid IPs found in region: ${region}`);
       continue;
     }
     console.log(`Found ${ipUrls.length} valid IPs in region: ${region}`);
