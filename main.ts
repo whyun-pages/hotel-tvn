@@ -1,8 +1,7 @@
 import fs from 'fs-extra';
-import path from 'path';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { firefox } from 'playwright';
+import { chromium } from 'playwright';
 import PQueue from 'p-queue';
 import Bottleneck from 'bottleneck';
 import { RegionUrl, ParsedChannel, Channel } from './types';
@@ -62,7 +61,7 @@ const limiter = new Bottleneck({
  * 使用 Playwright 获取页面内容
  */
 async function fetchPageWithPlaywright(url: string): Promise<string> {
-  const browser = await firefox.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     bypassCSP: true,
     ignoreHTTPSErrors: true,
@@ -148,7 +147,7 @@ async function getValidJsonUrls(): Promise<string[]> {
 
     const ipUrls = extractIPs(html);
     if (ipUrls.length === 0) {
-      console.log(`No valid IPs found in region: ${region}`);
+      console.log(`No valid IPs found in region: ${region}`, html);
       continue;
     }
     console.log(`Found ${ipUrls.length} valid IPs in region: ${region}`);
