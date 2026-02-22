@@ -4,11 +4,11 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
-env:
-  COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -17,7 +17,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Node - ${{ matrix.node-version }}
+        with:
+          # 在 pull_request 事件中，需要此行来检出头部的分支
+          ref: ${{ github.head_ref }}
+      - name: Install Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -45,7 +48,20 @@ jobs:
           pnpm install
           pnpm exec playwright install
 
-      - name: Start
+      - name: Build
         run: |
           pnpm start
+
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          # 提交信息
+          commit_message: "自动化: 提交生成的文件 [skip ci]"
+          
+          # 可选: 指定要添加的文件模式，默认是所有更改的文件
+          file_pattern: '*.txt *.m3u'
+          
+          # 可选: 自定义提交用户的名称和邮箱
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
 

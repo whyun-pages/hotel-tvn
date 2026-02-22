@@ -22,6 +22,10 @@ interface ParsedChannel {
   name: string;
   url: string;
 }
+interface RegionUrl {
+  region: string;
+  url: string;
+}
 function genUrlByRegion(region: string): string {
   const queryString = encodeURIComponent(
     Buffer.from(`"iptv/live/zh_cn.js" && country="CN" && region="${region}"`).toString('base64')
@@ -44,7 +48,7 @@ const provinces = ENV.PROVINCES?.split(',') || [
   '北京',
   '天津',
 ];
-const urls: string[] = [
+const urls: RegionUrl[] = [
   // genUrlByRegion('四川'),
   // genUrlByRegion('云南'),
   // genUrlByRegion('重庆'),
@@ -57,7 +61,7 @@ const urls: string[] = [
   // genUrlByRegion('内蒙古'),
   // genUrlByRegion('河北'),
   // genUrlByRegion('山东'),
-  ...provinces.map(genUrlByRegion),
+  ...provinces.map((region) => ({region, url: genUrlByRegion(region)})),
 
   // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0iU2ljaHVhbiI%3D",// 四川
   // "https://fofa.info/result?qbase64=ImlwdHYvbGl2ZS96aF9jbi5qcyIgJiYgY291bnRyeT0iQ04iICYmIHJlZ2lvbj0i5LqR5Y2XIg%3D%3D",// 云南
@@ -150,8 +154,8 @@ async function checkUrlAlive(url: string): Promise<string | null> {
 async function getValidJsonUrls(): Promise<string[]> {
   const allValid: string[] = [];
 
-  for (const sourceUrl of urls) {
-    console.log(`Processing source: ${sourceUrl}`);
+  for (const {url: sourceUrl, region } of urls) {
+    console.log(`Processing regin: ${region} source: ${sourceUrl}`);
     let html: string;
 
     if (sourceUrl.includes('raw.githubusercontent')) {
@@ -342,23 +346,23 @@ async function main() {
   let m3u8Content = '#EXTM3U\n';
   for (const ch of groups.CCTV) {
     txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1,${ch.name}\n${ch.url}\n`;
+    m3u8Content += `#EXTINF:-1 group-title="央视频道",${ch.name}\n${ch.url}\n`;
   }
 
   txtContent += '卫视频道,#genre#\n';
   for (const ch of groups.卫视) {
     txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1,${ch.name}\n${ch.url}\n`;
+    m3u8Content += `#EXTINF:-1 group-title="卫视频道",${ch.name}\n${ch.url}\n`;
   }
 
   txtContent += '其他频道,#genre#\n';
   for (const ch of groups.其他) {
     txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1,${ch.name}\n${ch.url}\n`;
+    m3u8Content += `#EXTINF:-1 tv-logo="https://tv-res.pages.dev/logo/${ch.name}.png" group-title="其他频道",${ch.name}\n${ch.url}\n`;
   }
 
   await fs.writeFile('lives.txt', txtContent, 'utf-8');
-  await fs.writeFile('lives.m3u8', m3u8Content, 'utf-8');
+  await fs.writeFile('lives.m3u', m3u8Content, 'utf-8');
 
   console.log("完成！生成 lives.txt 和 lives.m3u8");
 }
