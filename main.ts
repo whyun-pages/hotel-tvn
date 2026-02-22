@@ -5,27 +5,8 @@ import * as cheerio from 'cheerio';
 import { firefox } from 'playwright';
 import PQueue from 'p-queue';
 import Bottleneck from 'bottleneck';
+import { RegionUrl, ParsedChannel, Channel } from './types';
 const ENV = process.env
-// ==================== 类型定义 ====================
-
-interface Channel {
-  name: string;
-  url: string;
-  speed?: number;
-}
-
-interface ValidJsonResult {
-  url: string;
-}
-
-interface ParsedChannel {
-  name: string;
-  url: string;
-}
-interface RegionUrl {
-  region: string;
-  url: string;
-}
 function genUrlByRegion(region: string): string {
   const queryString = encodeURIComponent(
     Buffer.from(`"iptv/live/zh_cn.js" && country="CN" && region="${region}"`).toString('base64')
@@ -33,36 +14,34 @@ function genUrlByRegion(region: string): string {
   return `https://fofa.info/result?qbase64=${queryString}`;
 }
 const provinces = ENV.PROVINCES?.split(',') || [
-  '四川',
-  '云南',
-  '重庆',
-  '广东',
-  '陕西',
   '广西',
-  '黑龙江',
-  '吉林',
-  '辽宁',
+  '广东',
   '内蒙古',
-  '河北',
-  '山东',
-  '北京',
-  '天津',
   '河南',
+  '河北',
   '湖南',
   '湖北',
-  '安徽',
-  '江西',
-  '福建',
-  '浙江',
-  '上海',
-  '江苏',
-  '贵州',
-  '甘肃',
-  '青海',
-  '宁夏',
-  '新疆',
-  '西藏',
-  '海南',
+  '北京',
+  '山东',
+  '四川',
+  // '云南',
+  // '重庆',
+  // '陕西',
+  // '吉林',
+  // '辽宁',
+  // '安徽',
+  // '江西',
+  // '福建',
+  // '浙江',
+  // '上海',
+  // '江苏',
+  // '贵州',
+  // '甘肃',
+  // '青海',
+  // '宁夏',
+  // '新疆',
+  // '西藏',
+  // '海南',
 ];
 const urls: RegionUrl[] = [
   ...provinces.map((region) => ({region, url: genUrlByRegion(region)})),
@@ -168,6 +147,11 @@ async function getValidJsonUrls(): Promise<string[]> {
     }
 
     const ipUrls = extractIPs(html);
+    if (ipUrls.length === 0) {
+      console.log(`No valid IPs found in region: ${region}`);
+      continue;
+    }
+    console.log(`Found ${ipUrls.length} valid IPs in region: ${region}`);
     const baseIPs = [...new Set(
       ipUrls
         .map(u => {
