@@ -65,7 +65,6 @@ const limiter = new Bottleneck({
 const jsonUrls = [
   'http://183.223.157.33:9901/iptv/live/1000.json?key=txiptv',
   'http://117.174.99.170:9901/iptv/live/1000.json?key=txiptv',
-  'http://36.136.38.87:9901/iptv/live/1000.json?key=txiptv',
 ];
 
 /**
@@ -130,8 +129,12 @@ async function checkUrlAlive(url: string): Promise<string | null> {
     const res = await limiter.schedule(() =>
       axios.head(url, { timeout: REQUEST_TIMEOUT })
     );
-    if (res.status === 200) return url;
-  } catch {
+    if (res.status === 200) {
+      return url;
+    }
+    console.log(`${url} is not alive, status: ${res.status}, ${res.data}`);
+  } catch (e) {
+    console.log(`${url} is not alive, error: ${e}`);
     // 静默失败
   }
   return null;
