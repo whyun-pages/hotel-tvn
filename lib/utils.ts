@@ -200,12 +200,12 @@ export async function getValidJsonUrls(): Promise<string[]> {
 
 export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
   const okUrls: string[] = [];
-  jsonUrls.map(async (url) => {
+  await Promise.all(jsonUrls.map(async (url) => {
     const res = await checkUrlAlive(url);
     if (res) {
       okUrls.push(res);
     }
-  })
+  }))
   return okUrls;
 }
 
