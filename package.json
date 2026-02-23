@@ -9,7 +9,9 @@
 		"cheerio": "^1.2.0",
 		"fs-extra": "^11.3.3",
 		"p-queue": "^9.1.0",
-		"playwright": "^1.58.2"
+		"playwright": "^1.58.2",
+		"playwright-extra": "^4.3.6",
+		"puppeteer-extra-plugin-stealth": "^2.11.2"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",
