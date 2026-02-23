@@ -155,7 +155,7 @@ export async function getValidJsonUrls(): Promise<string[]> {
 
     const ipUrls = extractIPs(html);
     if (ipUrls.length === 0) {
-      console.log(`No valid IPs found in region: ${region}`);
+      console.log(`No valid IPs found in region: ${region} ${html}`);
       continue;
     }
     console.log(`Found ${ipUrls.length} valid IPs in region: ${region}`);
