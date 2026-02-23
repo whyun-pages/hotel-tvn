@@ -62,6 +62,12 @@ const limiter = new Bottleneck({
   minTime: 150,
 });
 
+const jsonUrls = [
+  'http://183.223.157.33:9901/iptv/live/1000.json?key=txiptv',
+  'http://117.174.99.170:9901/iptv/live/1000.json?key=txiptv',
+  'http://36.136.38.87:9901/iptv/live/1000.json?key=txiptv',
+];
+
 /**
  * 使用 Playwright 获取页面内容
  */
@@ -187,6 +193,17 @@ export async function getValidJsonUrls(): Promise<string[]> {
   }
 
   return [...new Set(allValid)];
+}
+
+export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
+  const okUrls: string[] = [];
+  jsonUrls.map(async (url) => {
+    const res = await checkUrlAlive(url);
+    if (res) {
+      okUrls.push(res);
+    }
+  })
+  return okUrls;
 }
 
 /**
