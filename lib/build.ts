@@ -7,6 +7,7 @@ import {
   testStreamSpeed,
   RESULT_LIMIT_PER_CHANNEL,
   getValidJsonUrlsFromLocalUrls,
+  genLiveFiles,
 } from './utils';
 const ENV = process.env;
 
@@ -47,60 +48,7 @@ export async function build() {
 
   await testQueue.onIdle();
 
-  // 排序：先按频道编号，再按速度降序
-  tested.sort((a, b) => {
-    const na = parseInt(a.name.match(/\d+/)?.[0] ?? '9999');
-    const nb = parseInt(b.name.match(/\d+/)?.[0] ?? '9999');
-    if (na !== nb) return na - nb;
-    return (b.speed ?? 0) - (a.speed ?? 0);
-  });
-
-  // 分组
-  const groups: Record<'CCTV' | '卫视' | '其他', Channel[]> = {
-    CCTV: [],
-    卫视: [],
-    其他: [],
-  };
-
-  const counters: Record<'CCTV' | '卫视' | '其他', number> = {
-    CCTV: 0,
-    卫视: 0,
-    其他: 0,
-  };
-
-  for (const ch of tested) {
-    let group: 'CCTV' | '卫视' | '其他' = '其他';
-    if (ch.name.includes('CCTV')) group = 'CCTV';
-    else if (ch.name.includes('卫视')) group = '卫视';
-
-    if (counters[group] >= RESULT_LIMIT_PER_CHANNEL) continue;
-
-    groups[group].push(ch);
-    counters[group]++;
-  }
-
-  // 生成 txt 文件
-  let txtContent = '央视频道,#genre#\n';
-  let m3u8Content = '#EXTM3U\n';
-  for (const ch of groups.CCTV) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 group-title="央视频道",${ch.name}\n${ch.url}\n`;
-  }
-
-  txtContent += '卫视频道,#genre#\n';
-  for (const ch of groups.卫视) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 group-title="卫视频道",${ch.name}\n${ch.url}\n`;
-  }
-
-  txtContent += '其他频道,#genre#\n';
-  for (const ch of groups.其他) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 tv-logo="https://tv-res.pages.dev/logo/${ch.name}.png" group-title="其他频道",${ch.name}\n${ch.url}\n`;
-  }
-
-  await fs.writeFile('lives.txt', txtContent, 'utf-8');
-  await fs.writeFile('lives.m3u', m3u8Content, 'utf-8');
+  await genLiveFiles(tested);
 
   console.log("完成！生成 lives.txt 和 lives.m3u8");
 }
