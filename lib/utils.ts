@@ -55,7 +55,7 @@ const urls: RegionUrl[] = [
 const CONCURRENCY = 60;
 const REQUEST_TIMEOUT = 800;
 const DOWNLOAD_TIMEOUT = 5000;
-export const RESULT_LIMIT_PER_CHANNEL = 8;
+export const RESULT_LIMIT_PER_CHANNEL = 1024;
 
 // 限流器
 const limiter = new Bottleneck({
@@ -231,8 +231,8 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
       // 清洗名称
       name = name
         .replace(/cctv/gi, 'CCTV')
-        .replace(/[中央|央视]/g, 'CCTV')
-        .replace(/高清|超高|HD|标清|频道|-| /g, '')
+        .replace(/(中央|央视)/g, 'CCTV')
+        .replace(/高清|超高|HD|标清|频道|\-|\s/g, '')
         .replace(/[＋()]/g, s => (s === '＋' ? '+' : ''))
         .replace(/PLUS/gi, '+')
         .replace(/CCTV(\d+)台/, 'CCTV$1')
@@ -286,6 +286,14 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
   }
 }
 
+function genChannelContent(group: string, ch: Channel) {
+  const logo = `https://tv-res.pages.dev/logo/${ch.name}.png`;
+
+  return {
+    txt: `${ch.name},${ch.url}\n`,
+    m3u8: `#EXTINF:-1 tv-name="${ch.name}" tv-logo="${logo}" group-title="${group}",${ch.name}\n${ch.url}\n`,
+  }
+}
 export async function genLiveFiles(tested: Channel[]) {
   // 排序：先按频道编号，再按速度降序
   tested.sort((a, b) => {
@@ -322,20 +330,23 @@ export async function genLiveFiles(tested: Channel[]) {
   let txtContent = '央视频道,#genre#\n';
   let m3u8Content = '#EXTM3U\n';
   for (const ch of groups.CCTV) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 group-title="央视频道",${ch.name}\n${ch.url}\n`;
+    const { txt, m3u8 } = genChannelContent('央视频道', ch);
+    txtContent += txt;
+    m3u8Content += m3u8;
   }
 
   txtContent += '卫视频道,#genre#\n';
   for (const ch of groups.卫视) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 group-title="卫视频道",${ch.name}\n${ch.url}\n`;
+    const { txt, m3u8 } = genChannelContent('卫视频道', ch);
+    txtContent += txt;
+    m3u8Content += m3u8;
   }
 
   txtContent += '其他频道,#genre#\n';
   for (const ch of groups.其他) {
-    txtContent += `${ch.name},${ch.url}\n`;
-    m3u8Content += `#EXTINF:-1 tv-logo="https://tv-res.pages.dev/logo/${ch.name}.png" group-title="其他频道",${ch.name}\n${ch.url}\n`;
+    const { txt, m3u8 } = genChannelContent('其他频道', ch);
+    txtContent += txt;
+    m3u8Content += m3u8;
   }
 
   await fs.writeFile('lives.txt', txtContent, 'utf-8');
