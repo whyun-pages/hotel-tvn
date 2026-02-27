@@ -21,7 +21,7 @@ import {
 import { Channel } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../data.json');
-const CONCURRENCY_JSON = 60;
+const CONCURRENCY_JSON = 128;
 const CONCURRENCY_STREAM = 16;
 
 export async function build() {
@@ -50,13 +50,18 @@ export async function build() {
   // 3. 检测 JSON 链接可用性
   const queueJson = new PQueue({ concurrency: CONCURRENCY_JSON });
   const aliveJsonUrls: string[] = [];
-  const settled = await Promise.allSettled(
+  let checked = 0;
+  await Promise.allSettled(
     allJsonCandidates.map((url) =>
       queueJson.add(async () => {
         const res = await checkUrlAlive(url);
         if (res) {
           aliveJsonUrls.push(res);
           console.log(`[可用] ${res}`);
+        }
+        checked++;
+        if (checked % 100 === 0) {
+          console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date());
         }
       })
     )
@@ -98,7 +103,9 @@ export async function build() {
           console.log(`[可播] ${result.name} (${(result.speed! * 1024).toFixed(2)} MB/s)`);
         }
         done++;
-        if (done % 50 === 0) console.log(`测速进度: ${done}/${allChannels.length}`);
+        if (done % 50 === 0) {
+          console.log(`测速进度: ${done}/${allChannels.length}`, new Date());
+        }
       })
     )
   );

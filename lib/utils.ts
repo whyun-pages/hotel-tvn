@@ -139,8 +139,8 @@ export async function checkUrlAlive(url: string): Promise<string | null> {
       return url;
     }
     console.log(`${url} is not alive, status: ${res.status}, ${res.data}`);
-  } catch (e) {
-    console.log(`${url} is not alive, error: ${e}`);
+  } catch (_e) {
+    // console.log(`${url} is not alive, error: ${e}`);
     // 静默失败
   }
   return null;
@@ -237,7 +237,7 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
       name = name
         .replace(/cctv/gi, 'CCTV')
         .replace(/(中央|央视)/g, 'CCTV')
-        .replace(/高清|超高|HD|标清|频道|-|\s/g, '')
+        .replace(/高清|超高|HD|标清|频道|-|—|\s/g, '')
         .replace(/[＋()]/g, s => (s === '＋' ? '+' : ''))
         .replace(/PLUS/gi, '+')
         .replace(/CCTV(\d+)台/, 'CCTV$1')
@@ -270,9 +270,6 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
         ;
 
       const finalUrl = urlx.startsWith('http') ? urlx : base + urlx;
-      if (name === 'CCTV-1') {
-        console.warn(it.name, '未裁剪名称', name);
-      }
       items.push({ name, url: finalUrl });
     }
 
@@ -327,13 +324,6 @@ function genChannelContent(group: string, ch: Channel) {
   }
 }
 export async function genLiveFiles(tested: Channel[]) {
-  // 排序：先按频道编号，再按速度降序
-  // tested.sort((a, b) => {
-  //   const na = parseInt(a.name.match(/\d+/)?.[0] ?? '9999');
-  //   const nb = parseInt(b.name.match(/\d+/)?.[0] ?? '9999');
-  //   if (na !== nb) return na - nb;
-  //   return (b.speed ?? 0) - (a.speed ?? 0);
-  // });
   // 分组
   const groups: Record<ChannelGroup, Channel[]> = {
     CCTV: [],
@@ -359,9 +349,17 @@ export async function genLiveFiles(tested: Channel[]) {
   }
   for (const group of Object.keys(groups) as ChannelGroup[]) {
     groups[group as ChannelGroup].sort((a, b) => {
-      const nameCompare = a.name.localeCompare(b.name)
-      if (nameCompare !== 0) {
-        return nameCompare;
+      if (group === 'CCTV') {
+        const channelIdA = a.name.match(/\d+/)?.[0] ?? '9999';
+        const channelIdB = b.name.match(/\d+/)?.[0] ?? '9999';
+        if (channelIdA !== channelIdB) {
+          return parseInt(channelIdA, 10) - parseInt(channelIdB, 10);
+        }
+      } else {
+        const nameCompare = a.name.localeCompare(b.name)
+        if (nameCompare !== 0) {
+          return nameCompare;
+        }
       }
       return (b.speed ?? 0) - (a.speed ?? 0);
     });
