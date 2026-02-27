@@ -5,9 +5,9 @@ export interface Channel {
   url: string;
   speed?: number;
 }
-interface ValidJsonResult {
-  url: string;
-}
+// interface ValidJsonResult {
+//   url: string;
+// }
 export interface ParsedChannel {
   name: string;
   url: string;

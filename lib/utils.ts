@@ -52,7 +52,7 @@ const urls: RegionUrl[] = [
   ...provinces.map((region) => ({region, url: genUrlByRegion(region)})),
 ];
 
-const CONCURRENCY = 60;
+const CONCURRENCY = 128;
 const REQUEST_TIMEOUT = 800;
 const DOWNLOAD_TIMEOUT = 5000;
 export const RESULT_LIMIT_PER_CHANNEL = 1024;
@@ -67,7 +67,12 @@ const jsonUrls = [
   'http://183.223.157.33:9901/iptv/live/1000.json?key=txiptv',
   'http://117.174.99.170:9901/iptv/live/1000.json?key=txiptv',
 ];
-
+interface ChannelItem {
+  name: string
+  url: string
+  typename: string
+}
+type ChannelGroup = 'CCTV' | '卫视' | '其他';
 /**
  * 使用 Playwright 获取页面内容
  */
@@ -156,7 +161,7 @@ export async function getValidJsonUrls(): Promise<string[]> {
         const res = await axios.get(sourceUrl, { timeout: 10000 });
         html = res.data;
       } catch (e) {
-        console.error(`Raw url failed: ${sourceUrl}`);
+        console.error(`Raw url failed: ${sourceUrl}`, e);
         continue;
       }
     } else {
@@ -221,9 +226,9 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
     const base = url.replace(/\/iptv\/live\/.*$/, '/');
     const items: ParsedChannel[] = [];
 
-    for (const it of (res.data.data as any[]) || []) {
+    for (const it of (res.data.data as ChannelItem[]) || []) {
       let name = String(it.name || '').trim();
-      let urlx = String(it.url || '').trim();
+      const urlx = String(it.url || '').trim();
 
       if (!name || !urlx) continue;
       if (urlx.includes(',')) continue;
@@ -232,15 +237,42 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
       name = name
         .replace(/cctv/gi, 'CCTV')
         .replace(/(中央|央视)/g, 'CCTV')
-        .replace(/高清|超高|HD|标清|频道|\-|\s/g, '')
+        .replace(/高清|超高|HD|标清|频道|-|\s/g, '')
         .replace(/[＋()]/g, s => (s === '＋' ? '+' : ''))
         .replace(/PLUS/gi, '+')
         .replace(/CCTV(\d+)台/, 'CCTV$1')
-        .replace(/CCTV1综合/, 'CCTV1')
-        .replace(/CCTV5\+体育(?:赛事|赛视)?/, 'CCTV5+');
+        .replace(/CCTV5\+体育(?:赛事|赛视)?/, 'CCTV5+')
+        .replace("CCTV1综合", "CCTV1")
+        .replace("CCTV2财经", "CCTV2")
+        .replace("CCTV3综艺", "CCTV3")
+        .replace("CCTV4国际", "CCTV4")
+        .replace("CCTV4中文国际", "CCTV4")
+        .replace("CCTV4欧洲", "CCTV4")
+        .replace("CCTV5体育", "CCTV5")
+        .replace("CCTV6电影", "CCTV6")
+        .replace("CCTV7军事", "CCTV7")
+        .replace("CCTV7军农", "CCTV7")
+        .replace("CCTV7农业", "CCTV7")
+        .replace("CCTV7国防军事", "CCTV7")
+        .replace("CCTV8电视剧", "CCTV8")
+        .replace("CCTV9记录", "CCTV9")
+        .replace("CCTV9纪录", "CCTV9")
+        .replace("CCTV10科教", "CCTV10")
+        .replace("CCTV11戏曲", "CCTV11")
+        .replace("CCTV12社会与法", "CCTV12")
+        .replace("CCTV13新闻", "CCTV13")
+        .replace("CCTV新闻", "CCTV13")
+        .replace("CCTV14少儿", "CCTV14")
+        .replace("CCTV15音乐", "CCTV15")
+        .replace("CCTV16奥林匹克", "CCTV16")
+        .replace("CCTV17农业农村", "CCTV17")
+        .replace("CCTV17农业", "CCTV17")
+        ;
 
       const finalUrl = urlx.startsWith('http') ? urlx : base + urlx;
-
+      if (name === 'CCTV-1') {
+        console.warn(it.name, '未裁剪名称', name);
+      }
       items.push({ name, url: finalUrl });
     }
 
@@ -296,27 +328,27 @@ function genChannelContent(group: string, ch: Channel) {
 }
 export async function genLiveFiles(tested: Channel[]) {
   // 排序：先按频道编号，再按速度降序
-  tested.sort((a, b) => {
-    const na = parseInt(a.name.match(/\d+/)?.[0] ?? '9999');
-    const nb = parseInt(b.name.match(/\d+/)?.[0] ?? '9999');
-    if (na !== nb) return na - nb;
-    return (b.speed ?? 0) - (a.speed ?? 0);
-  });
+  // tested.sort((a, b) => {
+  //   const na = parseInt(a.name.match(/\d+/)?.[0] ?? '9999');
+  //   const nb = parseInt(b.name.match(/\d+/)?.[0] ?? '9999');
+  //   if (na !== nb) return na - nb;
+  //   return (b.speed ?? 0) - (a.speed ?? 0);
+  // });
   // 分组
-  const groups: Record<'CCTV' | '卫视' | '其他', Channel[]> = {
+  const groups: Record<ChannelGroup, Channel[]> = {
     CCTV: [],
     卫视: [],
     其他: [],
   };
 
-  const counters: Record<'CCTV' | '卫视' | '其他', number> = {
+  const counters: Record<ChannelGroup, number> = {
     CCTV: 0,
     卫视: 0,
     其他: 0,
   };
 
   for (const ch of tested) {
-    let group: 'CCTV' | '卫视' | '其他' = '其他';
+    let group: ChannelGroup = '其他';
     if (ch.name.includes('CCTV')) group = 'CCTV';
     else if (ch.name.includes('卫视')) group = '卫视';
 
@@ -324,6 +356,15 @@ export async function genLiveFiles(tested: Channel[]) {
 
     groups[group].push(ch);
     counters[group]++;
+  }
+  for (const group of Object.keys(groups) as ChannelGroup[]) {
+    groups[group as ChannelGroup].sort((a, b) => {
+      const nameCompare = a.name.localeCompare(b.name)
+      if (nameCompare !== 0) {
+        return nameCompare;
+      }
+      return (b.speed ?? 0) - (a.speed ?? 0);
+    });
   }
 
   // 生成 txt 文件

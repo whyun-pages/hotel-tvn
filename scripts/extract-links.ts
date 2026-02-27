@@ -14,7 +14,7 @@ function hrefToHttpUrl(href: string): string | null {
   // href 形如: /hosts/115.58.217.130#HTTP-19901-TCP 或 /hosts/202.96.141.110?isCollapsed=true#HTTP-51276-TCP
   const match = href.match(/\/hosts\/([^?#]+).*?#(\w+)-(\d+)-/);
   if (!match) return null;
-  const [, ip, protocol, port] = match;
+  const [, ip, _protocol, port] = match;
   return `http://${ip}:${port}`;
 }
 

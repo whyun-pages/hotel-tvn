@@ -1,11 +1,10 @@
-import fs from 'fs-extra';
+// import fs from 'fs-extra';
 import PQueue from 'p-queue';
 import { ParsedChannel, Channel } from '../types';
 import {
   getValidJsonUrls,
   fetchAndParseJson,
   testStreamSpeed,
-  RESULT_LIMIT_PER_CHANNEL,
   getValidJsonUrlsFromLocalUrls,
   genLiveFiles,
 } from './utils';
