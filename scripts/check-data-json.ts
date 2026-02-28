@@ -21,7 +21,7 @@ import {
 import { Channel, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
-const CONCURRENCY_JSON = 128;
+const CONCURRENCY_JSON = 256;
 const CONCURRENCY_STREAM = 64;
 
 export async function build() {
