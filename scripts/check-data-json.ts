@@ -18,11 +18,11 @@ import {
   toBaseUrl,
   genLiveFiles,
 } from '../lib/utils';
-import { Channel } from '../types';
+import { Channel, TvServiceItem } from '../types';
 
-const DATA_JSON_PATH = path.join(__dirname, '../data.json');
+const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
 const CONCURRENCY_JSON = 128;
-const CONCURRENCY_STREAM = 16;
+const CONCURRENCY_STREAM = 64;
 
 export async function build() {
   const raw = fs.readFileSync(DATA_JSON_PATH, 'utf-8');
@@ -35,7 +35,7 @@ export async function build() {
   // 1. 转为 baseUrl 并去重
   const baseUrls = [...new Set(
     urls
-      .map(toBaseUrl)
+      .map((item) => toBaseUrl((item as unknown as TvServiceItem).baseUrl))
       .filter((v): v is string => !!v)
   )];
   console.log(`data.json 共 ${urls.length} 条 URL，得到 ${baseUrls.length} 个 baseUrl`);
@@ -83,6 +83,7 @@ export async function build() {
     }
   }
   const allChannels = [...channelMap.values()];
+  allChannels.sort((a, b) => a.name.localeCompare(b.name));
   console.log(`\n共解析到 ${allChannels.length} 个不重复频道`);
 
   if (allChannels.length === 0) {

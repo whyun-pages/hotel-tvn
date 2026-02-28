@@ -263,9 +263,12 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
         .replace("CCTV13新闻", "CCTV13")
         .replace("CCTV新闻", "CCTV13")
         .replace("CCTV14少儿", "CCTV14")
+        .replace("CCTV少儿", "CCTV14")
         .replace("CCTV15音乐", "CCTV15")
+        .replace("CCTV音乐", "CCTV15")
         .replace("CCTV16奥林匹克", "CCTV16")
         .replace("CCTV17农业农村", "CCTV17")
+        .replace("CCTV17农村农业", "CCTV17")
         .replace("CCTV17农业", "CCTV17")
         ;
 
