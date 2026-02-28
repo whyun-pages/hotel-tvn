@@ -23,7 +23,7 @@ interface ResultJson {
 
 const ROOT = process.cwd();
 const RESULT_PATH = path.join(ROOT, "dist/result.json");
-const OUTPUT_PATH = path.join(ROOT, "../tv_service.json");
+const OUTPUT_PATH = path.join(ROOT, "./tv_service.json");
 
 /** 从 json_path 如 "host.services[4].endpoints[0].http.body" 中提取 services 的索引 */
 function extractServiceIndex(jsonPath: string): number | null {
@@ -60,7 +60,7 @@ function main() {
     if (port == null) continue;
 
     items.push({
-      baseUrl: `${ip}:${port}`,
+      baseUrl: `http://${ip}:${port}`,
       province,
       city,
     });
