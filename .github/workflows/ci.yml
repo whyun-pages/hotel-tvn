@@ -4,6 +4,8 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
+  schedule:
+    - cron: '0 0 * * *' # 每天执行一次（UTC 0:00）
 env:
   USE_LOCAL_URLS: true
 jobs:
