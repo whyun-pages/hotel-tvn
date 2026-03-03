@@ -1,20 +1,15 @@
-// import fs from 'fs-extra';
 import PQueue from 'p-queue';
 import { ParsedChannel, Channel } from '../types';
 import {
-  getValidJsonUrls,
   fetchAndParseJson,
   testStreamSpeed,
   getValidJsonUrlsFromLocalUrls,
   genLiveFiles,
 } from './utils';
-const ENV = process.env;
 
 export async function build() {
   console.log("开始收集有效 JSON 地址...");
-  const validJsonUrls = ENV.USE_LOCAL_URLS === 'true' 
-    ? await getValidJsonUrlsFromLocalUrls()
-    : await getValidJsonUrls();
+  const validJsonUrls = await getValidJsonUrlsFromLocalUrls();
   console.log(`找到 ${validJsonUrls.length} 个可能有效的 JSON`);
 
   const allChannels: ParsedChannel[] = [];
