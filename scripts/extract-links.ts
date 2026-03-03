@@ -28,9 +28,7 @@ function main() {
   $('._highlightListSection_mmisv_12').each((_, section) => {
     const $section = $(section);
     // 在该 section 内找 ._highlightList_mmisv_12 ._highlightItem_1hehs_2 的第二个（eq(1)）
-    const $secondItem = $section
-      .find('._highlightList_mmisv_12 ._highlightItem_1hehs_2')
-      .eq(1);
+    const $secondItem = $section.find('._highlightList_mmisv_12 ._highlightItem_1hehs_2').eq(1);
     // 在第二个 item 内找 dd a，取每个 a 的 href
     $secondItem.find('dd a').each((__, anchor) => {
       const href = $(anchor).attr('href');

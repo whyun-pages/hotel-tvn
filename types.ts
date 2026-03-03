@@ -1,4 +1,3 @@
-
 // ==================== 类型定义 ====================
 export interface Channel {
   name: string;
@@ -15,9 +14,9 @@ export interface ParsedChannel {
 export interface RegionUrl {
   region: string;
   url: string;
-}export interface TvServiceItem {
+}
+export interface TvServiceItem {
   baseUrl: string;
   province: string;
   city: string;
 }
-

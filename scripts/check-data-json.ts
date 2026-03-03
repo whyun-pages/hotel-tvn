@@ -33,11 +33,13 @@ export async function build() {
   }
 
   // 1. 转为 baseUrl 并去重
-  const baseUrls = [...new Set(
-    urls
-      .map((item) => toBaseUrl((item as unknown as TvServiceItem).baseUrl))
-      .filter((v): v is string => !!v)
-  )];
+  const baseUrls = [
+    ...new Set(
+      urls
+        .map((item) => toBaseUrl((item as unknown as TvServiceItem).baseUrl))
+        .filter((v): v is string => !!v)
+    ),
+  ];
   console.log(`data.json 共 ${urls.length} 条 URL，得到 ${baseUrls.length} 个 baseUrl`);
 
   // 2. 生成所有候选 JSON 链接

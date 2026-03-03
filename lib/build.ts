@@ -8,7 +8,7 @@ import {
 } from './utils';
 
 export async function build() {
-  console.log("开始收集有效 JSON 地址...");
+  console.log('开始收集有效 JSON 地址...');
   const validJsonUrls = await getValidJsonUrlsFromLocalUrls();
   console.log(`找到 ${validJsonUrls.length} 个可能有效的 JSON`);
 
@@ -44,9 +44,5 @@ export async function build() {
 
   await genLiveFiles(tested);
 
-  console.log("完成！生成 lives.txt 和 lives.m3u8");
+  console.log('完成！生成 lives.txt 和 lives.m3u8');
 }
-
-
-
-

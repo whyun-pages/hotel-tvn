@@ -19,12 +19,11 @@ const jsonUrls = [
   'http://117.174.99.170:9901/iptv/live/1000.json?key=txiptv',
 ];
 interface ChannelItem {
-  name: string
-  url: string
-  typename: string
+  name: string;
+  url: string;
+  typename: string;
 }
 type ChannelGroup = 'CCTV' | '卫视' | '其他';
-
 
 /**
  * 根据基础 IP 生成 1~255 的所有候选地址
@@ -47,9 +46,7 @@ export function generateModifiedIPs(baseUrl: string): string[] {
  */
 export async function checkUrlAlive(url: string): Promise<string | null> {
   try {
-    const res = await limiter.schedule(() =>
-      axios.head(url, { timeout: REQUEST_TIMEOUT })
-    );
+    const res = await limiter.schedule(() => axios.head(url, { timeout: REQUEST_TIMEOUT }));
     if (res.status === 200) {
       return url;
     }
@@ -63,12 +60,14 @@ export async function checkUrlAlive(url: string): Promise<string | null> {
 
 export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
   const okUrls: string[] = [];
-  await Promise.all(jsonUrls.map(async (url) => {
-    const res = await checkUrlAlive(url);
-    if (res) {
-      okUrls.push(res);
-    }
-  }))
+  await Promise.all(
+    jsonUrls.map(async (url) => {
+      const res = await checkUrlAlive(url);
+      if (res) {
+        okUrls.push(res);
+      }
+    })
+  );
   return okUrls;
 }
 
@@ -95,40 +94,39 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
         .replace(/cctv/gi, 'CCTV')
         .replace(/(中央|央视)/g, 'CCTV')
         .replace(/高清|超高|HD|标清|频道|-|—|\s/g, '')
-        .replace(/[＋()]/g, s => (s === '＋' ? '+' : ''))
+        .replace(/[＋()]/g, (s) => (s === '＋' ? '+' : ''))
         .replace(/PLUS/gi, '+')
         .replace(/CCTV(\d+)台/, 'CCTV$1')
         .replace(/CCTV5\+体育(?:赛事|赛视)?/, 'CCTV5+')
-        .replace("CCTV1综合", "CCTV1")
-        .replace("CCTV2财经", "CCTV2")
-        .replace("CCTV3综艺", "CCTV3")
-        .replace("CCTV4国际", "CCTV4")
-        .replace("CCTV4中文国际", "CCTV4")
-        .replace("CCTV4欧洲", "CCTV4")
-        .replace("CCTV5体育", "CCTV5")
-        .replace("CCTV6电影", "CCTV6")
-        .replace("CCTV7军事", "CCTV7")
-        .replace("CCTV7军农", "CCTV7")
-        .replace("CCTV7农业", "CCTV7")
-        .replace("CCTV7国防军事", "CCTV7")
-        .replace("CCTV8电视剧", "CCTV8")
-        .replace("CCTV9记录", "CCTV9")
-        .replace("CCTV9纪录", "CCTV9")
-        .replace("CCTV10科教", "CCTV10")
-        .replace("CCTV11戏曲", "CCTV11")
-        .replace("CCTV12社会与法", "CCTV12")
-        .replace("CCTV13新闻", "CCTV13")
-        .replace("CCTV新闻", "CCTV13")
-        .replace("CCTV14少儿", "CCTV14")
-        .replace("CCTV少儿", "CCTV14")
-        .replace("CCTV15音乐", "CCTV15")
-        .replace("CCTV音乐", "CCTV15")
-        .replace("CCTV16奥林匹克", "CCTV16")
-        .replace("CCTV17农业农村", "CCTV17")
-        .replace("CCTV17农村农业", "CCTV17")
-        .replace("CCTV17农业", "CCTV17")
-        .replace('上海卫视', '东方卫视')
-        ;
+        .replace('CCTV1综合', 'CCTV1')
+        .replace('CCTV2财经', 'CCTV2')
+        .replace('CCTV3综艺', 'CCTV3')
+        .replace('CCTV4国际', 'CCTV4')
+        .replace('CCTV4中文国际', 'CCTV4')
+        .replace('CCTV4欧洲', 'CCTV4')
+        .replace('CCTV5体育', 'CCTV5')
+        .replace('CCTV6电影', 'CCTV6')
+        .replace('CCTV7军事', 'CCTV7')
+        .replace('CCTV7军农', 'CCTV7')
+        .replace('CCTV7农业', 'CCTV7')
+        .replace('CCTV7国防军事', 'CCTV7')
+        .replace('CCTV8电视剧', 'CCTV8')
+        .replace('CCTV9记录', 'CCTV9')
+        .replace('CCTV9纪录', 'CCTV9')
+        .replace('CCTV10科教', 'CCTV10')
+        .replace('CCTV11戏曲', 'CCTV11')
+        .replace('CCTV12社会与法', 'CCTV12')
+        .replace('CCTV13新闻', 'CCTV13')
+        .replace('CCTV新闻', 'CCTV13')
+        .replace('CCTV14少儿', 'CCTV14')
+        .replace('CCTV少儿', 'CCTV14')
+        .replace('CCTV15音乐', 'CCTV15')
+        .replace('CCTV音乐', 'CCTV15')
+        .replace('CCTV16奥林匹克', 'CCTV16')
+        .replace('CCTV17农业农村', 'CCTV17')
+        .replace('CCTV17农村农业', 'CCTV17')
+        .replace('CCTV17农业', 'CCTV17')
+        .replace('上海卫视', '东方卫视');
 
       const finalUrl = urlx.startsWith('http') ? urlx : base + urlx;
       items.push({ name, url: finalUrl });
@@ -182,7 +180,7 @@ function genChannelContent(group: string, ch: Channel) {
   return {
     txt: `${ch.name},${ch.url}\n`,
     m3u8: `#EXTINF:-1 tv-name="${ch.name}" tv-logo="${logo}" group-title="${group}",${ch.name}\n${ch.url}\n`,
-  }
+  };
 }
 export async function genLiveFiles(tested: Channel[]) {
   // 分组
@@ -217,7 +215,7 @@ export async function genLiveFiles(tested: Channel[]) {
           return parseInt(channelIdA, 10) - parseInt(channelIdB, 10);
         }
       } else {
-        const nameCompare = a.name.localeCompare(b.name)
+        const nameCompare = a.name.localeCompare(b.name);
         if (nameCompare !== 0) {
           return nameCompare;
         }
