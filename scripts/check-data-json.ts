@@ -18,14 +18,14 @@ import {
   toBaseUrl,
   genLiveFiles,
 } from '../lib/utils';
-import { Channel, TvServiceItem } from '../types';
+import { Channel, GenOptions, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
 const CONCURRENCY_JSON = 256;
 const CONCURRENCY_STREAM = 64;
 
-export async function build() {
-  const raw = fs.readFileSync(DATA_JSON_PATH, 'utf-8');
+export async function build(options: GenOptions = {}) {
+  const raw = fs.readFileSync(options.dataJsonPath || DATA_JSON_PATH, 'utf-8');
   const urls: string[] = JSON.parse(raw);
   if (!Array.isArray(urls) || urls.length === 0) {
     console.log('data.json 为空或格式不正确');
@@ -50,7 +50,7 @@ export async function build() {
   console.log(`共生成 ${allJsonCandidates.length} 个 JSON 候选链接`);
 
   // 3. 检测 JSON 链接可用性
-  const queueJson = new PQueue({ concurrency: CONCURRENCY_JSON });
+  const queueJson = new PQueue({ concurrency: options.concurrencyJson || CONCURRENCY_JSON });
   const aliveJsonUrls: string[] = [];
   let checked = 0;
   await Promise.allSettled(
@@ -94,7 +94,7 @@ export async function build() {
   }
 
   // 5. 测速检测频道是否可访问
-  const queueStream = new PQueue({ concurrency: CONCURRENCY_STREAM });
+  const queueStream = new PQueue({ concurrency: options.concurrencyStream || CONCURRENCY_STREAM });
   const okChannels: Channel[] = [];
   let done = 0;
   await Promise.all(
@@ -131,7 +131,7 @@ export async function build() {
   //   'utf-8'
   // );
   // console.log(`结果已写入 ${outPath}`);
-  await genLiveFiles(okChannels);
+  await genLiveFiles(okChannels, options.liveResultDir);
 }
 
 // build().catch((e) => {

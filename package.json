@@ -1,7 +1,42 @@
 {
+	"name": "hotel-tvn",
+	"version": "1.0.0",
+	"description": "",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/cjs/index.d.ts",
+				"default": "./dist/cjs/index.js"
+			}
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"bin": {
+		"tvn": "dist/cjs/cli.js"
+	},
+	"author": "yunnysunny<yunnysunny@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/whyun-pages/hotel-tvn.git"
+	},
+	"homepage": "https://github.com/whyun-pages/hotel-tvn",
+	"keywords": [
+		"hotel-tv",
+		"iptv",
+		"censys"
+	],
 	"scripts": {
 		"start": "tsx main.ts",
-		"build": "tsc",
+		"build:cjs": "tsc --project tsconfig.json",
+		"build:esm": "tsc --project tsconfig.esm.json",
+		"build": "pnpm build:cjs && pnpm build:esm",
 		"lint": "eslint . --ext .ts",
 		"lint:fix": "eslint . --ext .ts --fix",
 		"format": "prettier --write ./**/*.ts"
@@ -9,12 +44,9 @@
 	"dependencies": {
 		"axios": "^1.13.5",
 		"bottleneck": "^2.19.5",
-		"cheerio": "^1.2.0",
+		"commander": "^14.0.3",
 		"fs-extra": "^11.3.3",
-		"p-queue": "^9.1.0",
-		"playwright": "^1.58.2",
-		"playwright-extra": "^4.3.6",
-		"puppeteer-extra-plugin-stealth": "^2.11.2"
+		"p-queue": "^9.1.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

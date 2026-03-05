@@ -3,6 +3,7 @@ import Bottleneck from 'bottleneck';
 import axios from 'axios';
 import { ParsedChannel } from '../types';
 import { Channel } from '../types';
+import path from 'path';
 
 const REQUEST_TIMEOUT = 800;
 const DOWNLOAD_TIMEOUT = 5000;
@@ -182,7 +183,7 @@ function genChannelContent(group: string, ch: Channel) {
     m3u8: `#EXTINF:-1 tv-name="${ch.name}" tv-logo="${logo}" group-title="${group}",${ch.name}\n${ch.url}\n`,
   };
 }
-export async function genLiveFiles(tested: Channel[]) {
+export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
   // 分组
   const groups: Record<ChannelGroup, Channel[]> = {
     CCTV: [],
@@ -247,10 +248,10 @@ export async function genLiveFiles(tested: Channel[]) {
     m3u8Content += m3u8;
   }
 
-  await fs.writeFile('lives.txt', txtContent, 'utf-8');
-  await fs.writeFile('lives.m3u', m3u8Content, 'utf-8');
+  await fs.writeFile(path.join(liveResultDir || '', 'lives.txt'), txtContent, 'utf-8');
+  await fs.writeFile(path.join(liveResultDir || '', 'lives.m3u'), m3u8Content, 'utf-8');
 }
-/** 与 utils.ts 174-175 相同的转换：http://A.B.C.D:port -> http://A.B.C.1:port */
+/** 转换：http://A.B.C.D:port -> http://A.B.C.1:port */
 
 export function toBaseUrl(u: string): string | null {
   const m = u.match(/http:\/\/(\d+\.\d+\.\d+)\.\d+:\d+/);
