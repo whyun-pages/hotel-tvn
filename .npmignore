@@ -1,4 +1,8 @@
 test/
+clis/
+lib/
+scripts/
+*.ts
 .github/
 .vscode/
 .eslintrc.js

@@ -7,7 +7,7 @@
  * 5. 用 testStreamSpeed 检测每个频道链接是否可访问
  * 6. 生成 lives.txt 和 lives.m3u8
  */
-import * as fs from 'fs';
+import { readFile } from 'fs/promises';
 import * as path from 'path';
 import PQueue from 'p-queue';
 import {
@@ -21,11 +21,21 @@ import {
 import { Channel, GenOptions, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
+const DATA_JSON_PATH2 = path.join(__dirname, '../../../tv_service.json');
 const CONCURRENCY_JSON = 256;
 const CONCURRENCY_STREAM = 64;
 
 export async function build(options: GenOptions = {}) {
-  const raw = fs.readFileSync(options.dataJsonPath || DATA_JSON_PATH, 'utf-8');
+  let raw: string;
+  if (options.dataJsonPath) {
+    raw = await readFile(options.dataJsonPath, 'utf-8');
+  } else {
+    try {
+      raw = await readFile(DATA_JSON_PATH, 'utf-8');
+    } catch (_error) {
+      raw = await readFile(DATA_JSON_PATH2, 'utf-8');
+    }
+  }
   const urls: string[] = JSON.parse(raw);
   if (!Array.isArray(urls) || urls.length === 0) {
     console.log('data.json 为空或格式不正确');
@@ -81,7 +91,9 @@ export async function build(options: GenOptions = {}) {
     const channels = await fetchAndParseJson(jsonUrl);
     for (const ch of channels) {
       const key = `${ch.name}|${ch.url}`;
-      if (!channelMap.has(key)) channelMap.set(key, ch);
+      if (!channelMap.has(key)) {
+        channelMap.set(key, ch);
+      }
     }
   }
   const allChannels = [...channelMap.values()];
