@@ -47,6 +47,21 @@ tvn
 | `--concurrency-json <n>`   | —     | Concurrency for JSON URL checks.                                            |
 | `--concurrency-stream <n>` | —     | Concurrency for stream speed tests.                                         |
 
+### More Examples
+
+```bash
+# Custom data file and output directory
+tvn -d ./my-services.json -o ./output
+
+# Limit concurrency
+tvn --concurrency-json 128 --concurrency-stream 32
+
+# Help
+tvn --help
+```
+
+### How to get tv_service.json
+
 The tv_service.json can be generated from result.json using the **sgen** command.
 
 If you have a **result.json** exported from [Censys](https://platform.censys.io/api/search?q=host.services.endpoints.http.body%3A+%22%2Fiptv%2Flive%2F%22+and+host.location.country_code%3A+%22CN%22&_cb=5f3928&_data=routes%2Fapi.search), use **genServiceJson** to parse it and generate **tv_service.json** for **tvn** (each item is `{ baseUrl, province, city }`).
@@ -63,19 +78,6 @@ sgen parse-result-json -i ./my_result.json -o ./my_tv_service.json
 | --------------------------- | ----- | ------------------------------------------------------------ |
 | `--input-json-path <path>`  | `-i`  | Path to input result.json (default: `dist/result.json`).     |
 | `--output-json-path <path>` | `-o`  | Path to output tv_service.json (default: `tv_service.json`). |
-
-### More Examples
-
-```bash
-# Custom data file and output directory
-tvn -d ./my-services.json -o ./output
-
-# Limit concurrency
-tvn --concurrency-json 128 --concurrency-stream 32
-
-# Help
-tvn --help
-```
 
 ## Use as a JavaScript / TypeScript library
 
