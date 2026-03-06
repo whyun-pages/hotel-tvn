@@ -78,7 +78,9 @@ export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
 export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
   try {
     const res = await axios.get(url, { timeout: 2000 });
-    if (res.status !== 200 || !res.data?.data) return [];
+    if (res.status !== 200 || !res.data?.data) {
+return [];
+}
 
     const base = url.replace(/\/iptv\/live\/.*$/, '/');
     const items: ParsedChannel[] = [];
@@ -87,8 +89,12 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
       let name = String(it.name || '').trim();
       const urlx = String(it.url || '').trim();
 
-      if (!name || !urlx) continue;
-      if (urlx.includes(',')) continue;
+      if (!name || !urlx) {
+continue;
+}
+      if (urlx.includes(',')) {
+continue;
+}
 
       // 清洗名称
       name = name
@@ -147,12 +153,16 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
 
   try {
     const m3u8Res = await axios.get(url, { timeout: 1500 });
-    if (m3u8Res.status !== 200) throw new Error('m3u8 failed');
+    if (m3u8Res.status !== 200) {
+throw new Error('m3u8 failed');
+}
 
     const lines = m3u8Res.data.split('\n').map((l: string) => l.trim());
     const tsFiles = lines.filter((l: string) => !l.startsWith('#') && l);
 
-    if (tsFiles.length === 0) throw new Error('no ts');
+    if (tsFiles.length === 0) {
+throw new Error('no ts');
+}
 
     const base = url.substring(0, url.lastIndexOf('/') + 1);
     const firstTs = base + tsFiles[0];
@@ -164,7 +174,9 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
     });
     const duration = (Date.now() - start) / 1000;
 
-    if (duration < 0.05) throw new Error('too fast');
+    if (duration < 0.05) {
+throw new Error('too fast');
+}
 
     const sizeKB = tsRes.data.byteLength / 1024;
     const speedMBps = sizeKB / duration / 1024;
@@ -199,10 +211,15 @@ export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
 
   for (const ch of tested) {
     let group: ChannelGroup = '其他';
-    if (ch.name.includes('CCTV')) group = 'CCTV';
-    else if (ch.name.includes('卫视')) group = '卫视';
+    if (ch.name.includes('CCTV')) {
+group = 'CCTV';
+} else if (ch.name.includes('卫视')) {
+group = '卫视';
+}
 
-    if (counters[group] >= RESULT_LIMIT_PER_CHANNEL) continue;
+    if (counters[group] >= RESULT_LIMIT_PER_CHANNEL) {
+continue;
+}
 
     groups[group].push(ch);
     counters[group]++;
