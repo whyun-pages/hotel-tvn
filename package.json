@@ -1,6 +1,6 @@
 {
 	"name": "hotel-tvn",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "",
 	"exports": {
 		".": {
@@ -16,9 +16,9 @@
 	},
 	"files": [
 		"dist",
-    "tv_service.json",
-    "lives.txt",
-    "lives.m3u"
+		"tv_service.json",
+		"lives.txt",
+		"lives.m3u"
 	],
 	"bin": {
 		"tvn": "dist/cjs/clis/tvn.js",
