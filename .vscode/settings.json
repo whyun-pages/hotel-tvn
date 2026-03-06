@@ -4,5 +4,5 @@
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
-    "editor.formatOnSaveMode": "modifications"
+    "editor.formatOnSaveMode": "file"
 }

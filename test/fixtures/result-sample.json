@@ -1,0 +1,35 @@
+{
+  "results": {
+    "hits": [
+      {
+        "host": {
+          "host": {
+            "ip": "192.168.1.100",
+            "location": { "province": "Guangdong", "city": "Shenzhen" },
+            "services": [
+              { "port": 8080 },
+              { "port": 9901 }
+            ]
+          }
+        },
+        "highlights": [
+          null,
+          { "json_path": "host.services[1].endpoints[0].http.body" }
+        ]
+      },
+      {
+        "host": {
+          "host": {
+            "ip": "10.0.0.50",
+            "location": { "province": "Beijing", "city": "" },
+            "services": [{ "port": 9901 }]
+          }
+        },
+        "highlights": [
+          null,
+          { "json_path": "host.services[0].endpoints[0].http.body" }
+        ]
+      }
+    ]
+  }
+}

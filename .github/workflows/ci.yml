@@ -51,11 +51,26 @@ jobs:
         run: |
           pnpm install
 
+      - name: Lint
+        if: github.event_name != 'schedule'
+        run: |
+          pnpm lint
       - name: Build
         run: |
-          pnpm start
+          pnpm build
+
+      - name: Test
+        if: github.event_name != 'schedule'
+        run: |
+          pnpm test
+
+      - name: Generate Live Files
+        if: github.event_name == 'schedule'
+        run: |
+          pnpm start:prod
 
       - name: Commit
+        if: github.event_name == 'schedule'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           # 提交信息

@@ -26,9 +26,9 @@ Install globally with npm:
 npm install -g hotel-tvn
 ```
 
-The **tvn** command will be available on your PATH.
+The **tvn** and **sgen** commands will be available on your PATH.
 
-## Command-line usage
+## Command-line usage (tvn)
 
 ### Run with defaults
 
@@ -38,16 +38,33 @@ Uses `tv_service.json` in the current directory and default concurrency:
 tvn
 ```
 
-### Options
+**Options**:
 
-| Option | Short | Description |
-|--------|--------|-------------|
-| `--data-json-path <path>` | `-d` | Path to the data JSON file (default: `tv_service.json`). |
-| `--live-result-dir <dir>` | `-o` | Directory for **lives.txt** and **lives.m3u** (default: current directory). |
-| `--concurrency-json <n>` | — | Concurrency for JSON URL checks. |
-| `--concurrency-stream <n>` | — | Concurrency for stream speed tests. |
+| Option                     | Short | Description                                                                 |
+| -------------------------- | ----- | --------------------------------------------------------------------------- |
+| `--data-json-path <path>`  | `-d`  | Path to the data JSON file (default: `tv_service.json`).                    |
+| `--live-result-dir <dir>`  | `-o`  | Directory for **lives.txt** and **lives.m3u** (default: current directory). |
+| `--concurrency-json <n>`   | —     | Concurrency for JSON URL checks.                                            |
+| `--concurrency-stream <n>` | —     | Concurrency for stream speed tests.                                         |
 
-### Examples
+The tv_service.json can be generated from result.json using the **sgen** command.
+
+If you have a **result.json** exported from [Censys](https://platform.censys.io/api/search?q=host.services.endpoints.http.body%3A+%22%2Fiptv%2Flive%2F%22+and+host.location.country_code%3A+%22CN%22&_cb=5f3928&_data=routes%2Fapi.search), use **genServiceJson** to parse it and generate **tv_service.json** for **tvn** (each item is `{ baseUrl, province, city }`).
+
+```bash
+# Use default paths: input dist/result.json, output tv_service.json
+sgen parse-result-json
+
+# Specify input and output paths
+sgen parse-result-json -i ./my_result.json -o ./my_tv_service.json
+```
+
+| Option                      | Short | Description                                                  |
+| --------------------------- | ----- | ------------------------------------------------------------ |
+| `--input-json-path <path>`  | `-i`  | Path to input result.json (default: `dist/result.json`).     |
+| `--output-json-path <path>` | `-o`  | Path to output tv_service.json (default: `tv_service.json`). |
+
+### More Examples
 
 ```bash
 # Custom data file and output directory
@@ -101,24 +118,12 @@ await build({
 
 - **`build(options?: GenOptions): Promise<void>`**  
   Runs the full pipeline (read data JSON → probe URLs → parse channels → test streams → write lives.txt and lives.m3u). Options match the CLI:
-
-  - `dataJsonPath` – path to the data JSON file  
-  - `liveResultDir` – directory for **lives.txt** and **lives.m3u**  
-  - `concurrencyJson` – concurrency for JSON checks  
-  - `concurrencyStream` – concurrency for stream tests  
+  - `dataJsonPath` – path to the data JSON file
+  - `liveResultDir` – directory for **lives.txt** and **lives.m3u**
+  - `concurrencyJson` – concurrency for JSON checks
+  - `concurrencyStream` – concurrency for stream tests
 
 - **Types**: `GenOptions`, `Channel`, `ParsedChannel`, `RegionUrl`, `TvServiceItem` (see `types.ts`).
-
-## Data JSON format
-
-The data JSON is an array of entries. Each entry can be a URL string or an object with at least a `baseUrl` (used for `TvServiceItem`). Example:
-
-```json
-[
-  "http://192.168.1.1:8080/api/channels.json",
-  { "baseUrl": "http://10.0.0.1:8080", "province": "Guangdong", "city": "Shenzhen" }
-]
-```
 
 ## License
 

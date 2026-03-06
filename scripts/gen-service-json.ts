@@ -1,10 +1,6 @@
-/**
- * 解析 dist/result.json，提取为 { baseUrl, province, city } 并保存为 tv_service.json
- * baseUrl = ip:port，ip 取自 host.host.ip，port 从 highlights[1].json_path 中的 host.services[$index] 得到 index，再取 host.services[index].port
- */
 import * as fs from 'fs';
-import * as path from 'path';
-import { TvServiceItem } from '../types';
+import * as path from 'node:path';
+import { TvServiceGenOptions, TvServiceItem } from '../types';
 
 interface ResultJson {
   results?: {
@@ -12,27 +8,25 @@ interface ResultJson {
       host?: {
         host?: {
           ip?: string;
-          location?: { province?: string; city?: string };
-          services?: Array<{ port?: number }>;
+          location?: { province?: string; city?: string; };
+          services?: Array<{ port?: number; }>;
         };
       };
-      highlights?: Array<{ json_path?: string }>;
+      highlights?: Array<{ json_path?: string; }>;
     }>;
   };
 }
-
 const ROOT = __dirname;
 const RESULT_PATH = path.join(ROOT, '../dist/result.json');
 const OUTPUT_PATH = path.join(ROOT, '../tv_service.json');
-
 /** 从 json_path 如 "host.services[4].endpoints[0].http.body" 中提取 services 的索引 */
 function extractServiceIndex(jsonPath: string): number | null {
   const m = jsonPath.match(/host\.services\[(\d+)\]/);
   return m ? parseInt(m[1], 10) : null;
 }
 
-function main() {
-  const raw = fs.readFileSync(RESULT_PATH, 'utf-8');
+export function genServiceJson(options: TvServiceGenOptions = {}) {
+  const raw = fs.readFileSync(options.inputJsonPath || RESULT_PATH, 'utf-8');
   const data: ResultJson = JSON.parse(raw);
 
   const hits = data.results?.hits ?? [];
@@ -44,20 +38,30 @@ function main() {
     const province = location?.province ?? '';
     const city = location?.city ?? '';
 
-    if (!ip) continue;
+    if (!ip) {
+      continue;
+    }
 
     const highlight = hit.highlights?.[1];
     const jsonPath = highlight?.json_path;
-    if (!jsonPath) continue;
+    if (!jsonPath) {
+      continue;
+    }
 
     const serviceIndex = extractServiceIndex(jsonPath);
-    if (serviceIndex == null) continue;
+    if (serviceIndex == null) {
+      continue;
+    }
 
     const services = hit.host?.host?.services;
-    if (!services || serviceIndex >= services.length) continue;
+    if (!services || serviceIndex >= services.length) {
+      continue;
+    }
 
     const port = services[serviceIndex]?.port;
-    if (port == null) continue;
+    if (port == null) {
+      continue;
+    }
 
     items.push({
       baseUrl: `http://${ip}:${port}`,
@@ -65,9 +69,7 @@ function main() {
       city,
     });
   }
-
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(items, null, 2), 'utf-8');
-  console.log(`解析完成，共 ${items.length} 条，已写入 ${OUTPUT_PATH}`);
+  const outputPath = options.outputJsonPath || OUTPUT_PATH;
+  fs.writeFileSync(outputPath, JSON.stringify(items, null, 2), 'utf-8');
+  console.log(`解析完成，共 ${items.length} 条，已写入 ${outputPath}`);
 }
-
-main();

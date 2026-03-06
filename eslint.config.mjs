@@ -21,6 +21,9 @@ export default defineConfig(
         // TypeScript 特有的选项
         ignoreRestSiblings: true, // 忽略解构剩余变量（如 const { a, ...rest } = obj）
       }],
+      "curly": "error", // 强制使用大括号
+      // 2. 强制大括号换行风格
+      "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
     },
   },
   {

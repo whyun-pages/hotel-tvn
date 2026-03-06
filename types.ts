@@ -38,3 +38,8 @@ export interface TvServiceItem {
   province: string;
   city: string;
 }
+
+export interface TvServiceGenOptions {
+  inputJsonPath?: string;
+  outputJsonPath?: string;
+}

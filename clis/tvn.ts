@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { build } from './scripts/check-data-json';
-import type { GenOptions } from './types';
+import { build } from '../scripts/check-data-json';
+import type { GenOptions } from '../types';
 
 program
-  .name('hotel-tvn')
+  .name('tvn')
   .description('酒店 TV 源生成：从 data JSON 检测可用链接并生成 lives.txt / lives.m3u')
   .option(
     '-d, --data-json-path <path>',
@@ -29,10 +29,18 @@ program
   )
   .action(async (cliOpts: Record<string, unknown>) => {
     const options: GenOptions = {};
-    if (cliOpts.dataJsonPath != null) options.dataJsonPath = String(cliOpts.dataJsonPath);
-    if (cliOpts.liveResultDir != null) options.liveResultDir = String(cliOpts.liveResultDir);
-    if (typeof cliOpts.concurrencyJson === 'number') options.concurrencyJson = cliOpts.concurrencyJson;
-    if (typeof cliOpts.concurrencyStream === 'number') options.concurrencyStream = cliOpts.concurrencyStream;
+    if (cliOpts.dataJsonPath != null) {
+      options.dataJsonPath = String(cliOpts.dataJsonPath);
+    }
+    if (cliOpts.liveResultDir != null) {
+      options.liveResultDir = String(cliOpts.liveResultDir);
+    }
+    if (typeof cliOpts.concurrencyJson === 'number') {
+      options.concurrencyJson = cliOpts.concurrencyJson;
+    }
+    if (typeof cliOpts.concurrencyStream === 'number') {
+      options.concurrencyStream = cliOpts.concurrencyStream;
+    }
 
     await build(options);
   });

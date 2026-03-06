@@ -1,0 +1,6 @@
+test/
+.github/
+.vscode/
+.eslintrc.js
+.prettierrc
+data-check-result.json
