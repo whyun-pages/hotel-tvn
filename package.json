@@ -15,7 +15,10 @@
 		}
 	},
 	"files": [
-		"dist"
+		"dist",
+    "tv_service.json",
+    "lives.txt",
+    "lives.m3u"
 	],
 	"bin": {
 		"tvn": "dist/cjs/clis/tvn.js",
