@@ -1,14 +1,22 @@
 import http from 'node:http';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const livesTxtPath = path.join(__dirname, 'lives.txt');
+const livesM3uPath = path.join(__dirname, 'lives.m3u');
 
 const server = http.createServer((req, res) => {
   const url = req.url;
   if (url === '/lives.txt') {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    fs.createReadStream('../lives.txt').pipe(res);
+    fs.createReadStream(livesTxtPath).pipe(res);
   } else if (url === '/lives.m3u') {
     res.writeHead(200, { 'Content-Type': 'application/vnd.apple.mpegurl' });
-    fs.createReadStream('../lives.m3u').pipe(res);
+    fs.createReadStream(livesM3uPath).pipe(res);
   } else {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not Found');
