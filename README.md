@@ -127,6 +127,84 @@ await build({
 
 - **Types**: `GenOptions`, `Channel`, `ParsedChannel`, `RegionUrl`, `TvServiceItem` (see `types.ts`).
 
+## Docker image usage
+
+The project provides a Docker image to run the **tvn** pipeline and a scheduled task (runs once daily at midnight).
+
+### Pull the image
+
+Pull from Docker Hub (replace `yunnysunny` with your Docker Hub yunnysunny):
+
+```bash
+docker pull yunnysunny/hotel-tvn:latest
+```
+
+### Run the container
+
+**Basic usage**: mount your data file and output directory, then run.
+
+```powershell
+# Windows (PowerShell)
+docker run -d --name hotel-tvn `
+  -v ${PWD}/tv_service.json:/app/tv_service.json `
+  -v ${PWD}/output:/app/output `
+  -e LIVE_RESULT_DIR=/app/output `
+  yunnysunny/hotel-tvn:latest
+```
+
+```bash
+# Linux / macOS
+docker run -d --name hotel-tvn \
+  -v "$(pwd)/tv_service.json:/app/tv_service.json" \
+  -v "$(pwd)/output:/app/output" \
+  -e LIVE_RESULT_DIR=/app/output \
+  yunnysunny/hotel-tvn:latest
+```
+
+- First volume: mounts your host `tv_service.json` into the container as the data source.
+- Second volume: mounts your host `output` directory to `/app/output` and sets `LIVE_RESULT_DIR=/app/output` so **lives.txt** and **lives.m3u** are written there and visible on the host under `output`.
+
+### Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATA_JSON_PATH` | Path to the data JSON file (default: `/app/tv_service.json` in the container). |
+| `LIVE_RESULT_DIR` | Directory for **lives.txt** and **lives.m3u** (default: `/app`). |
+| `CONCURRENCY_JSON` | Concurrency for JSON URL checks. |
+| `CONCURRENCY_STREAM` | Concurrency for stream speed tests. |
+
+The scheduled task reads `schedule-config.json` generated from these variables (you can generate this config at container startup if needed).
+
+**Example**: custom output directory and concurrency
+
+```bash
+docker run -d --name hotel-tvn \
+  -e LIVE_RESULT_DIR=/app/output \
+  -e CONCURRENCY_JSON=128 \
+  -e CONCURRENCY_STREAM=32 \
+  -v "$(pwd)/tv_service.json:/app/tv_service.json" \
+  -v "$(pwd)/output:/app/output" \
+  yunnysunny/hotel-tvn:latest
+```
+
+### Build the image locally
+
+From the project root:
+
+```bash
+docker build -t hotel-tvn:local .
+```
+
+Example run with the local image:
+
+```bash
+docker run -d --name hotel-tvn \
+  -v "$(pwd)/tv_service.json:/app/tv_service.json" \
+  -v "$(pwd)/output:/app/output" \
+  -e LIVE_RESULT_DIR=/app/output \
+  hotel-tvn:local
+```
+
 ## License
 
 MIT
