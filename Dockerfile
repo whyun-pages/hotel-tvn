@@ -1,7 +1,7 @@
 # --- 第一阶段：获取静态二进制文件 ---
 FROM busybox:stable-musl AS toolchain
 
-FROM yunnysunny/node as prod-deps
+FROM yunnysunny/node AS prod-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --production
