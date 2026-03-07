@@ -16,9 +16,7 @@
 	},
 	"files": [
 		"dist",
-		"tv_service.json",
-		"lives.txt",
-		"lives.m3u"
+		"tv_service.json"
 	],
 	"bin": {
 		"tvn": "dist/cjs/clis/tvn.js",
@@ -39,6 +37,7 @@
 	"scripts": {
 		"start": "tsx main.ts",
 		"start:prod": "tvn",
+    "schedule:prod": "node dist/cjs/scripts/schedule-check-data.js",
 		"build:cjs": "tsc --project tsconfig.json",
 		"build:esm": "tsc --project tsconfig.esm.json",
 		"build": "pnpm build:cjs && pnpm build:esm",

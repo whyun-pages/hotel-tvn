@@ -8,3 +8,5 @@ scripts/
 .eslintrc.js
 .prettierrc
 data-check-result.json
+Dockerfile
+docker/

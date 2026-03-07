@@ -11,6 +11,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts", "clis/tvn.ts", "clis/sgen.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "*.ts",
+    "clis/tvn.ts",
+    "clis/sgen.ts",
+    "scripts/schedule-check-data.ts"
+  ],
+  "exclude": ["node_modules", "vitest.config.ts"]
 }

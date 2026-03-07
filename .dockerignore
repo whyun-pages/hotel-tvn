@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.md
+test/
+.github/
+.vscode/
+.prettierrc
+eslint.config.mjs
+tsconfig.esm.json
