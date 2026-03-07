@@ -133,7 +133,7 @@ The project provides a Docker image to run the **tvn** pipeline and a scheduled 
 
 ### Pull the image
 
-Pull from Docker Hub (replace `yunnysunny` with your Docker Hub yunnysunny):
+Pull from Docker Hub:
 
 ```bash
 docker pull yunnysunny/hotel-tvn:latest
