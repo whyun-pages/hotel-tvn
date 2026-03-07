@@ -11,7 +11,7 @@ RUN pnpm install
 COPY . .
 RUN pnpm build:cjs
 
-FROM node:slim AS runner
+FROM yunnysunny/node AS runner
 WORKDIR /app
 # 从第一阶段只拷贝那一个 1MB 左右的二进制文件
 COPY --from=toolchain /bin/busybox /usr/local/bin/busybox
