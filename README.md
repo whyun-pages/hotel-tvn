@@ -1,5 +1,10 @@
 # hotel-tvn
 
+[![npm version](https://img.shields.io/npm/v/hotel-tvn.svg)](https://www.npmjs.com/package/hotel-tvn)
+[![npm downloads](https://img.shields.io/npm/dm/hotel-tvn.svg)](https://www.npmjs.com/package/hotel-tvn)
+[![license](https://img.shields.io/npm/l/hotel-tvn.svg)](https://github.com/whyun-pages/hotel-tvn/blob/main/LICENSE)
+[![Docker Image](https://img.shields.io/docker/v/yunnysunny/hotel-tvn?logo=docker)](https://hub.docker.com/r/yunnysunny/hotel-tvn)
+
 Generate hotel TV / IPTV channel lists from a data JSON. The tool reads a list of service URLs, probes JSON endpoints on the local network, parses channel lists, tests stream availability and speed, then writes **lives.txt** and **lives.m3u**.
 
 > **Disclaimer:** This project is for learning purposes only. Please delete any generated live source files (e.g. `lives.txt`, `lives.m3u`) within 24 hours.
@@ -64,7 +69,7 @@ tvn --help
 
 The tv_service.json can be generated from result.json using the **sgen** command.
 
-If you have a **result.json** exported from [Censys](https://platform.censys.io/api/search?q=host.services.endpoints.http.body%3A+%22%2Fiptv%2Flive%2F%22+and+host.location.country_code%3A+%22CN%22&_cb=5f3928&_data=routes%2Fapi.search), use **genServiceJson** to parse it and generate **tv_service.json** for **tvn** (each item is `{ baseUrl, province, city }`).
+If you have a **result.json** exported from [Censys](https://platform.censys.io/api/search?q=host.services.endpoints.http.body%3A+%22%2Fiptv%2Flive%2F%22+and+host.location.country_code%3A+%22CN%22&_cb=5f3928&_data=routes%2Fapi.search), use **sgen** to parse it and generate **tv_service.json** for **tvn** (each item is `{ baseUrl, province, city }`).
 
 ```bash
 # Use default paths: input dist/result.json, output tv_service.json
@@ -166,12 +171,12 @@ docker run -d --name hotel-tvn \
 
 ### Environment variables
 
-| Variable | Description |
-|----------|-------------|
-| `DATA_JSON_PATH` | Path to the data JSON file (default: `/app/tv_service.json` in the container). |
-| `LIVE_RESULT_DIR` | Directory for **lives.txt** and **lives.m3u** (default: `/app`). |
-| `CONCURRENCY_JSON` | Concurrency for JSON URL checks. |
-| `CONCURRENCY_STREAM` | Concurrency for stream speed tests. |
+| Variable             | Description                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `DATA_JSON_PATH`     | Path to the data JSON file (default: `/app/tv_service.json` in the container). |
+| `LIVE_RESULT_DIR`    | Directory for **lives.txt** and **lives.m3u** (default: `/app`).               |
+| `CONCURRENCY_JSON`   | Concurrency for JSON URL checks.                                               |
+| `CONCURRENCY_STREAM` | Concurrency for stream speed tests.                                            |
 
 The scheduled task reads `schedule-config.json` generated from these variables (you can generate this config at container startup if needed).
 
