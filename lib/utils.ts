@@ -192,7 +192,7 @@ function genChannelContent(group: string, ch: Channel) {
 
   return {
     txt: `${ch.name},${ch.url}\n`,
-    m3u8: `#EXTINF:-1 tv-name="${ch.name}" tv-logo="${logo}" group-title="${group}",${ch.name}\n${ch.url}\n`,
+    m3u8: `#EXTINF:-1 tvg-id="${ch.name}" tvg-name="${ch.name}" tvg-logo="${logo}" group-title="${group}",${ch.name}\n${ch.url}\n`,
   };
 }
 export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
@@ -244,7 +244,7 @@ continue;
 
   // 生成 txt 文件
   let txtContent = '央视频道,#genre#\n';
-  let m3u8Content = '#EXTM3U\n';
+  let m3u8Content = '#EXTM3U x-tvg-url="https://tv.whyun.com/epg/51zmt.xml"\n';
   for (const ch of groups.CCTV) {
     const { txt, m3u8 } = genChannelContent('央视频道', ch);
     txtContent += txt;
