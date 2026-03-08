@@ -3,6 +3,7 @@ name: Schedule
 on:
   schedule:
     - cron: '0 0 * * *' # 每天执行一次（UTC 0:00）
+  workflow_dispatch: # 开启手动触发
 env:
   USE_LOCAL_URLS: true
 jobs:
@@ -50,6 +51,12 @@ jobs:
       - name: Generate Live Files
         run: |
           pnpm start:prod
+
+      - name: Upload Live Files to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-files  # 下载时的文件名
+          path: lives.txt lives.m3u          # 要上传的文件夹或文件路径
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
