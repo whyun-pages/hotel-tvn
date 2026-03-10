@@ -18,7 +18,13 @@ jobs:
 
       - name: Get short sha
         id: vars
-        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          YEAR=$(date +%Y)
+          MONTH=$(date +%-m)   # -m → 去掉前导零的月份 (1-12)
+          DAY=$(date +%-d)     # -d   → 去掉前导零的天   (1-31)
+          TODAY="$YEAR.$MONTH.$DAY"
+          echo "today=$TODAY" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,7 +43,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/hotel-tvn:${{ steps.vars.outputs.short_sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/hotel-tvn:${{ steps.vars.outputs.today }}
             ${{ secrets.DOCKERHUB_USERNAME }}/hotel-tvn:latest
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
