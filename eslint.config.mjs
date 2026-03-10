@@ -3,12 +3,19 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import { defineConfig } from 'eslint/config';
-
+import globals from "globals";
 
 export default defineConfig(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier, // 放在最后，关闭与 Prettier 冲突的规则
+  {
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
   {
     rules: {
       // 你的其他规则

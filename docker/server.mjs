@@ -5,9 +5,19 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const livesTxtPath = path.join(__dirname, 'lives.txt');
-const livesM3uPath = path.join(__dirname, 'lives.m3u');
+let config = {};
+try {
+  config = await import('schedule-config.json', {
+    with: {
+      type: 'json',
+    },
+  });
+} catch (_error) {
+  console.warn('读取 schedule-config.json 失败');
+}
+const saveDir = config.liveResultDir || __dirname;
+const livesTxtPath = path.join(saveDir, 'lives.txt');
+const livesM3uPath = path.join(saveDir, 'lives.m3u');
 
 const server = http.createServer((req, res) => {
   const url = req.url;
