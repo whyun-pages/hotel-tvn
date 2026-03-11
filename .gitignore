@@ -2,3 +2,5 @@ node_modules
 dist
 .env
 data-check-result.json
+schedule-config.json
+docker/lives.*

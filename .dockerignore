@@ -7,3 +7,4 @@ test/
 .prettierrc
 eslint.config.mjs
 tsconfig.esm.json
+docker/lives.*
