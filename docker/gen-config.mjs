@@ -10,7 +10,7 @@ try {
 const newJson = {
   ...oldJson,
   dataJsonPath: ENV.DATA_JSON_PATH || oldJson.dataJsonPath,
-  liveResultDir: ENV.LIVE_RESULT_DIR || oldJson.liveResultDir,
+  liveResultDir: ENV.LIVE_RESULT_DIR || oldJson.liveResultDir || '/app',
   concurrencyJson: ENV.CONCURRENCY_JSON || oldJson.concurrencyJson,
   concurrencyStream: ENV.CONCURRENCY_STREAM || oldJson.concurrencyStream,
 };
