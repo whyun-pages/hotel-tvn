@@ -151,7 +151,7 @@ docker pull yunnysunny/hotel-tvn:latest
 ```powershell
 # Windows (PowerShell)
 docker run -d --name hotel-tvn `
-  -p 3000:3000 `
+  -p 8080:80 `
   -v ${PWD}/tv_service.json:/app/tv_service.json `
   -v ${PWD}/output:/app/output `
   -e LIVE_RESULT_DIR=/app/output `
@@ -161,7 +161,7 @@ docker run -d --name hotel-tvn `
 ```bash
 # Linux / macOS
 docker run -d --name hotel-tvn \
-  -p 3000:3000 \
+  -p 8080:80 \
   -v "$(pwd)/tv_service.json:/app/tv_service.json" \
   -v "$(pwd)/output:/app/output" \
   -e LIVE_RESULT_DIR=/app/output \
@@ -170,19 +170,19 @@ docker run -d --name hotel-tvn \
 
 - First volume: mounts your host `tv_service.json` into the container as the data source.
 - Second volume: mounts your host `output` directory to `/app/output` and sets `LIVE_RESULT_DIR=/app/output` so **lives.txt** and **lives.m3u** are written there and visible on the host under `output`.
-- `-p 3000:3000`: exposes the in-container HTTP server so you can access the channel list via URL (see below).
+- `-p 8080:80`: exposes the in-container HTTP server so you can access the channel list via URL (see below).
 
 ### Access lives.txt and lives.m3u via HTTP
 
-The container runs an HTTP server on port **3000** that serves the generated channel list files. After starting the container with `-p 3000:3000`, you can open or use these URLs:
+The container runs an HTTP server on port **8080** that serves the generated channel list files. After starting the container with `-p 8080:80`, you can open or use these URLs:
 
 | File        | URL (local)                          | Usage |
 | ----------- | ------------------------------------ | ----- |
-| **lives.txt** | `http://localhost:3000/lives.txt`  | Plain list of stream URLs, one per line. |
-| **lives.m3u** | `http://localhost:3000/lives.m3u`  | M3U playlist for IPTV players (e.g. VLC, Kodi). |
+| **lives.txt** | `http://localhost:8080/lives.txt`  | Plain list of stream URLs, one per line. |
+| **lives.m3u** | `http://localhost:8080/lives.m3u`  | M3U playlist for IPTV players (e.g. VLC, Kodi). |
 
-- **On the same machine**: use `http://localhost:3000/lives.txt` or `http://localhost:3000/lives.m3u`.
-- **From another device on the network**: replace `localhost` with the host’s IP (e.g. `http://192.168.1.100:3000/lives.m3u`).
+- **On the same machine**: use `http://localhost:8080/lives.txt` or `http://localhost:8080/lives.m3u`.
+- **From another device on the network**: replace `localhost` with the host’s IP (e.g. `http://192.168.1.100:8080/lives.m3u`).
 
 You can paste the **lives.m3u** URL into an IPTV app, or open **lives.txt** in a browser to copy stream links.
 
@@ -201,7 +201,7 @@ The scheduled task reads `schedule-config.json` generated from these variables (
 
 ```bash
 docker run -d --name hotel-tvn \
-  -p 3000:3000 \
+  -p 8080:80 \
   -e LIVE_RESULT_DIR=/app/output \
   -e CONCURRENCY_JSON=128 \
   -e CONCURRENCY_STREAM=32 \
@@ -222,7 +222,7 @@ Example run with the local image:
 
 ```bash
 docker run -d --name hotel-tvn \
-  -p 3000:3000 \
+  -p 8080:80 \
   -v "$(pwd)/tv_service.json:/app/tv_service.json" \
   -v "$(pwd)/output:/app/output" \
   -e LIVE_RESULT_DIR=/app/output \
