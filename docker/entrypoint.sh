@@ -6,4 +6,4 @@ node /app/gen-config.mjs
 
 # 1. 后台启动 crond (不带 -f 参数)
 busybox crond -L /dev/stderr
-exec node /app/server.mjs
+exec node --max-old-space-size=256 --max-semi-space-size=8 --optimize-for-size /app/server.mjs
