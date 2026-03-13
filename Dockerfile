@@ -69,7 +69,9 @@ RUN mkdir -p /var/spool/cron/crontabs && \
 COPY --from=nginx-builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=nginx-builder /etc/nginx /etc/nginx
 COPY --from=nginx-builder /usr/share/nginx /usr/share/nginx
-RUN mkdir -p /var/log/nginx /var/run /var/cache/nginx
+RUN mkdir -p /var/log/nginx /var/run /var/cache/nginx \
+    && ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log
 COPY --from=builder /app/dist ./dist/
 COPY --from=builder /app/tv_service.json \
 /app/lives.txt \
