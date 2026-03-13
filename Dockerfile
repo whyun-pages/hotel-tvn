@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential wget ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-ARG NGINX_VERSION=1.27.1  # 或最新稳定版，如 1.27.x
+ARG NGINX_VERSION=1.28.2
 RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     tar -zxvf nginx-${NGINX_VERSION}.tar.gz && \
     cd nginx-${NGINX_VERSION} && \
