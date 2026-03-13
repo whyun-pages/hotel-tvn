@@ -79,4 +79,5 @@ COPY --from=builder /app/tv_service.json \
 ./
 COPY --from=prod-deps /app/node_modules ./node_modules/
 
+EXPOSE 80
 ENTRYPOINT ["/app/entrypoint.sh"]
