@@ -21,7 +21,6 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
       --lock-path=/var/run/nginx.lock \
       --http-log-path=/var/log/nginx/access.log \
       --error-log-path=/var/log/nginx/error.log \
-      --without-http_ssl_module \
       --without-http_gzip_module \
       --without-http_rewrite_module \
       --without-http_autoindex_module \
@@ -33,13 +32,21 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
       --without-http_fastcgi_module \
       --without-http_uwsgi_module \
       --without-http_scgi_module \
+      --without-http_grpc_module \
+      --without-http_upstream_hash_module \
+      --without-http_upstream_ip_hash_module \
+      --without-http_upstream_least_conn_module \
+      --without-http_upstream_random_module \
+      --without-http_upstream_keepalive_module \
+      --without-http_upstream_zone_module \
       --without-http_memcached_module \
       --without-http_empty_gif_module \
       --without-http_browser_module \
       --without-mail_pop3_module \
       --without-mail_imap_module \
       --without-mail_smtp_module \
-      --without-stream \
+      --without-pcre \
+      --without-pcre2 \
       && make -j$(nproc) && make install
 
 FROM yunnysunny/node AS prod-deps
