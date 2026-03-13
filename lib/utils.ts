@@ -133,6 +133,7 @@ continue;
         .replace('CCTV17农业农村', 'CCTV17')
         .replace('CCTV17农村农业', 'CCTV17')
         .replace('CCTV17农业', 'CCTV17')
+        .replace('CCTVCCTV台球', 'CCTV台球')
         .replace('上海卫视', '东方卫视');
 
       const finalUrl = urlx.startsWith('http') ? urlx : base + urlx;
