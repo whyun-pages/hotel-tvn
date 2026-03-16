@@ -20,6 +20,12 @@
     - name: generate-live-files
       script: pnpm start:prod
       timeout: 3h
+    - name: release upload attachments
+      image: cnbcool/attachments:latest
+      settings:
+        attachments:
+          - ./lives.txt
+          - ./lives.m3u
 
 
 main:
