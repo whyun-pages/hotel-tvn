@@ -1,5 +1,6 @@
 node_modules
 dist
+output/
 .env
 data-check-result.json
 schedule-config.json

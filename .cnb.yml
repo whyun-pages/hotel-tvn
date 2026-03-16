@@ -10,6 +10,9 @@ resources:
     image: node:22
   env:
     USE_LOCAL_URLS: "true"
+  imports:
+    # 引用密钥仓库中的特定文件
+    - https://cnb.cool/whyun-pages/secrets/-/blob/main/cf.yml
   stages:
     - name: install-pnpm
       script: |
@@ -23,13 +26,20 @@ resources:
     - name: generate-live-files
       script: pnpm start:prod
       timeout: 3h
-    - name: release upload attachments
-      image: cnbcool/attachments:latest
-      settings:
-        attachments:
-          - ./lives.txt
-          - ./lives.m3u
-
+    - name: upload to Cloudflare Pages
+      script: |
+        # 使用 npx 直接运行 wrangler 部署命令
+        # --dir 指定你的静态产物目录
+        # --project-name 指定你的项目名
+        mkdir -p output
+        cp lives.txt lives.m3u output/
+        npx wrangler pages deploy ./output \
+          --project-name="hotel-tvn" \
+          --branch="main"
+      env:
+        # 这里的变量会自动从 CNB 环境变量中读取
+        CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
+        CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID
 
 main:
   # 定时任务：每天 8:00 (Asia/Shanghai)，对应原 schedule 的 cron UTC 0:00
