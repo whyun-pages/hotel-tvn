@@ -10,3 +10,4 @@ scripts/
 data-check-result.json
 Dockerfile
 docker/
+.cnb.yml

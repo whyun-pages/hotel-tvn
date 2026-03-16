@@ -8,3 +8,4 @@ test/
 eslint.config.mjs
 tsconfig.esm.json
 docker/lives.*
+.cnb.yml
