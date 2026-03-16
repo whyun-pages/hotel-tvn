@@ -8,8 +8,10 @@ resources:
 .update_live_pipeline: &update_live_pipeline
   docker:
     image: node:22
-  env:
-    USE_LOCAL_URLS: "true"
+  runner:
+    # 指定在 amd64 架构构建节点上执行
+    tags: cnb:arch:amd64
+    cpus: 1
   imports:
     # 引用密钥仓库中的特定文件
     - https://cnb.cool/whyun-pages/secrets/-/blob/main/cf.yml
