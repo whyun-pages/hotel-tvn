@@ -1,0 +1,34 @@
+# 云原生构建配置 (https://cnb.cool/)
+# 实现与 .github/workflows/schedule.yml 相同的功能：每日更新 live 文件并提交
+
+# 共用流水线模板（锚点复用）
+.update_live_pipeline: &update_live_pipeline
+  docker:
+    image: node:22
+  env:
+    USE_LOCAL_URLS: "true"
+  stages:
+    - name: install-pnpm
+      script: |
+        corepack enable
+        corepack prepare pnpm@10 --activate
+        pnpm --version
+    - name: install-deps
+      script: pnpm install
+    - name: build
+      script: pnpm build
+    - name: generate-live-files
+      script: pnpm start:prod
+      timeout: 3h
+
+
+main:
+  # 定时任务：每天 8:00 (Asia/Shanghai)，对应原 schedule 的 cron UTC 0:00
+  "crontab: 0 8 * * *":
+    - name: update-live-files
+      <<: *update_live_pipeline
+
+  # 手动触发：在 CNB 页面「手动触发构建」选择 web_trigger_schedule
+  web_trigger_schedule:
+    - name: update-live-files-manual
+      <<: *update_live_pipeline
