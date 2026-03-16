@@ -1,0 +1,9 @@
+# 手动触发按钮配置（在代码-分支详情页显示）
+# 文档：https://docs.cnb.cool/zh/build/web-trigger.html
+
+branch:
+  # 以下按钮在所有分支详情页显示
+  - buttons:
+      - name: 更新 Live 文件
+        description: 立即执行「安装依赖 → 构建 → 生成 lives.txt / lives.m3u」
+        event: web_trigger_schedule
