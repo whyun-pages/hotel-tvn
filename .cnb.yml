@@ -35,9 +35,12 @@ resources:
         # --project-name 指定你的项目名
         mkdir -p output
         cp lives.txt lives.m3u output/
-        npx wrangler pages deploy ./output \
-          --project-name="hotel-tvn" \
-          --branch="main"
+        tar -cf lives.tar output
+        curl -X POST \
+        "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/hotel-tvn/deployments" \
+        -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+        -F "manifest=@lives.tar"
+
       env:
         # 这里的变量会自动从 CNB 环境变量中读取
         CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
