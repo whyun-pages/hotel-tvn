@@ -1,5 +1,8 @@
 # 云原生构建配置 (https://cnb.cool/)
 # 实现与 .github/workflows/schedule.yml 相同的功能：每日更新 live 文件并提交
+resources:
+  cpu: 1
+  memory: 2Gi
 
 # 共用流水线模板（锚点复用）
 .update_live_pipeline: &update_live_pipeline
