@@ -15,12 +15,26 @@ done
 # 去掉最后一个逗号并闭合 JSON
 MANIFEST="${MANIFEST%,}}"
 
-# 2. 调用 API 上传
-# 我们需要同时发送 manifest 字符串和每个文件本身
-# 注意：-F 参数后的名称必须和 manifest 里的文件名（不带斜杠）对应
-curl -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}/deployments" \
+# 2. 创建 deployment，获取 id
+RESPONSE=$(curl -s -X POST \
+  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}/deployments" \
   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  -F "manifest=$MANIFEST" \
+  -F "manifest=$MANIFEST")
+
+if command -v jq &>/dev/null; then
+  DEPLOYMENT_ID=$(echo "$RESPONSE" | jq -r '.result.id // empty')
+else
+  DEPLOYMENT_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"\([^"]*\)"/\1/')
+fi
+if [ -z "$DEPLOYMENT_ID" ]; then
+  echo "创建 deployment 失败，响应: $RESPONSE"
+  exit 1
+fi
+echo "Deployment ID: $DEPLOYMENT_ID"
+
+# 3. 上传文件完成部署
+curl -X POST \
+  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}/deployments/${DEPLOYMENT_ID}/files" \
+  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
   -F "lives.txt=@$DIRECTORY/lives.txt" \
-  -H "Content-Type: multipart/form-data" \
   -F "lives.m3u=@$DIRECTORY/lives.m3u"
