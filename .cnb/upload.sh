@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# 配置变量
+# 配置变量（DIRECTORY 相对于脚本所在目录，与从何处运行无关）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_NAME="hotel-tvn"
-DIRECTORY="../output"
+DIRECTORY="$SCRIPT_DIR/../output"
 
 # 1. 生成 manifest (文件名: 哈希值)
 # 使用 sha256sum 计算并构建 JSON
