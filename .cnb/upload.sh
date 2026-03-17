@@ -24,7 +24,8 @@ RESPONSE=$(curl -s -X POST \
 if command -v jq &>/dev/null; then
   DEPLOYMENT_ID=$(echo "$RESPONSE" | jq -r '.result.id // empty')
 else
-  DEPLOYMENT_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"\([^"]*\)"/\1/')
+  # 兼容 "id": "xxx" 或 "id":"xxx"（冒号后可有空格）
+  DEPLOYMENT_ID=$(echo "$RESPONSE" | grep -oE '"id"[ \t]*:[ \t]*"[^"]*"' | head -1 | sed -E 's/"id"[ \t]*:[ \t]*"([^"]*)"/\1/')
 fi
 if [ -z "$DEPLOYMENT_ID" ]; then
   echo "创建 deployment 失败，响应: $RESPONSE"
