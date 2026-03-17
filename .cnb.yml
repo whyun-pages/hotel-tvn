@@ -41,11 +41,8 @@ resources:
         fi
         mkdir -p output
         cp lives.txt lives.m3u output/
-        tar -cf lives.tar output
-        curl -sS -X POST \
-          "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/hotel-tvn/deployments" \
-          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-          -F "manifest=@lives.tar"
+        ./.cnb/upload.sh
+        
 
 main:
   # 定时任务：每天 8:00 (Asia/Shanghai)，对应原 schedule 的 cron UTC 0:00
