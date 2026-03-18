@@ -74,6 +74,7 @@ RUN mkdir -p /var/log/nginx /var/run /var/cache/nginx \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 COPY --from=builder /app/dist ./dist/
 COPY --from=builder /app/tv_service.json \
+/app/index.html \
 /app/lives.txt \
 /app/lives.m3u \
 /app/package.json \
