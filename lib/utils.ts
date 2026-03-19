@@ -189,7 +189,7 @@ throw new Error('too fast');
 }
 
 function genChannelContent(group: string, ch: Channel) {
-  const logo = `https://tv-res.pages.dev/logo/${ch.name}.png`;
+  const logo = `https://tv-res.pages.dev/logo/${ch.name?.replaceAll('CCTV', 'cctv')}.png`;
 
   return {
     txt: `${ch.name},${ch.url}\n`,
