@@ -1,8 +1,8 @@
 # 定时任务：每天更新 live 文件并提交
 name: Schedule
 on:
-  schedule:
-    - cron: '0 0 * * *' # 每天执行一次（UTC 0:00）
+  # schedule:
+  #   - cron: '0 0 * * *' # 每天执行一次（UTC 0:00）
   workflow_dispatch: # 开启手动触发
 env:
   USE_LOCAL_URLS: true
