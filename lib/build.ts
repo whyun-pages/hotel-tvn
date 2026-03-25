@@ -35,7 +35,7 @@ export async function build() {
       const result = await testStreamSpeed(ch);
       if (result) {
         tested.push(result);
-        console.log(`可用 ${tested.length} | ${result.name} → ${result.speed!.toFixed(2)} MB/s`);
+        console.log(`可用 ${tested.length} | ${result.name} → ${result.speed!.toFixed(2)} MB/s`, process.memoryUsage());
       }
     });
   }
