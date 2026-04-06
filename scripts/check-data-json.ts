@@ -17,6 +17,7 @@ import {
   testStreamSpeed,
   toBaseUrl,
   genLiveFiles,
+  getMemoryUsage,
 } from '../lib/utils';
 import { Channel, GenOptions, TvServiceItem } from '../types';
 
@@ -73,7 +74,7 @@ export async function build(options: GenOptions = {}) {
         }
         checked++;
         if (checked % 100 === 0) {
-          console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date());
+          console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date(), getMemoryUsage());
         }
       })
     )
@@ -119,7 +120,7 @@ export async function build(options: GenOptions = {}) {
         }
         done++;
         if (done % 50 === 0) {
-          console.log(`测速进度: ${done}/${allChannels.length}`, new Date());
+          console.log(`测速进度: ${done}/${allChannels.length}`, new Date(), getMemoryUsage());
         }
       })
     )

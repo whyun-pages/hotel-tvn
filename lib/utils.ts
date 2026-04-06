@@ -275,3 +275,12 @@ export function toBaseUrl(u: string): string | null {
   const m = u.match(/http:\/\/(\d+\.\d+\.\d+)\.\d+:\d+/);
   return m ? `http://${m[1]}.1${u.match(/:\d+/)![0]}` : null;
 }
+
+export function getMemoryUsage() {
+  const memoryUsage = process.memoryUsage();
+  return {
+    rss: memoryUsage.rss / 1024 / 1024,
+    heapTotal: memoryUsage.heapTotal / 1024 / 1024,
+    heapUsed: memoryUsage.heapUsed / 1024 / 1024,
+  };
+}
