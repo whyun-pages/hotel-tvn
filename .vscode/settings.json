@@ -1,8 +1,12 @@
 {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.tabSize": 2,
-    "editor.insertSpaces": true,
-    "editor.detectIndentation": false,
-    "editor.formatOnSaveMode": "file"
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSaveMode": "file",
+  "vitest.debugNodeEnv": {
+    "RUN_LIVE_TESTS": "1"
+  },
+  "vitest.cliArguments": "--testTimeout=60000"
 }

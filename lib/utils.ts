@@ -58,7 +58,9 @@ export async function checkUrlAlive(url: string): Promise<string | null> {
   }
   return null;
 }
-
+/**
+ * 从本地获取可用的 JSON 地址，仅作本地测试用
+ */
 export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
   const okUrls: string[] = [];
   await Promise.all(
@@ -74,29 +76,42 @@ export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
 
 /**
  * 从 JSON 地址获取并解析频道列表
+ * 处理流程：
+ * 1. 拉取远端 JSON 数据
+ * 2. 校验响应结构是否符合预期
+ * 3. 计算相对播放地址所需的基地址
+ * 4. 过滤无效频道项并规范化名称
+ * 5. 输出统一格式的频道列表
  */
 export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
   try {
+    // 第 1 步：请求远端 JSON 数据
     const res = await axios.get(url, { timeout: 2000 });
+
+    // 第 2 步：响应失败，或没有可解析的 data 字段时直接返回空数组
     if (res.status !== 200 || !res.data?.data) {
 return [];
 }
 
-    const base = url.replace(/\/iptv\/live\/.*$/, '/');
+    // 第 3 步：提取当前 JSON 所在目录，用于补全相对地址
+    const base = url.replace(/\/iptv\/live\/.*$/, '');
     const items: ParsedChannel[] = [];
 
+    // 第 4 步：遍历原始频道项，逐条过滤并转换为统一结构
     for (const it of (res.data.data as ChannelItem[]) || []) {
       let name = String(it.name || '').trim();
       const urlx = String(it.url || '').trim();
 
+      // 跳过名称或播放地址为空的脏数据
       if (!name || !urlx) {
 continue;
 }
+      // 跳过包含多个地址的聚合字段，避免后续解析异常
       if (urlx.includes(',')) {
 continue;
 }
 
-      // 清洗名称
+      // 统一频道名称格式，便于后续分组、排序和去重
       name = name
         .replace(/cctv/gi, 'CCTV')
         .replace(/(中央|央视)/g, 'CCTV')
@@ -136,7 +151,16 @@ continue;
         .replace('CCTVCCTV台球', 'CCTV台球')
         .replace('上海卫视', '东方卫视');
 
-      const finalUrl = urlx.startsWith('http') ? urlx : base + urlx;
+      // 第 5 步：将相对地址补全为绝对地址，并写入最终结果
+      let finalUrl = urlx;
+      if (urlx.startsWith('http')) {
+        finalUrl = urlx;
+      } else if (urlx.startsWith('/')) {
+        finalUrl = base + urlx;
+      } else {
+        finalUrl = base + '/' + urlx;
+      }
+
       items.push({ name, url: finalUrl });
     }
 

@@ -59,6 +59,7 @@ jobs:
           path: |
             lives.txt
             lives.m3u
+            index.html
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5

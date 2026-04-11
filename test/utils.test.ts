@@ -1,5 +1,20 @@
-import { describe, it, expect } from 'vitest';
-import { generateModifiedIPs, toBaseUrl } from '../lib/utils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn(),
+    head: vi.fn(),
+  },
+}));
+
+import axios from 'axios';
+import { fetchAndParseJson, generateModifiedIPs, toBaseUrl } from '../lib/utils';
+
+const mockAxiosGet = vi.mocked(axios.get);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('generateModifiedIPs', () => {
   it('generates 255 URLs with last octet 1 to 255', () => {
@@ -30,5 +45,39 @@ describe('toBaseUrl', () => {
     expect(toBaseUrl('http://example.com:80')).toBeNull();
     expect(toBaseUrl('http://192.168.1:80')).toBeNull();
     expect(toBaseUrl('')).toBeNull();
+  });
+});
+
+describe('fetchAndParseJson', () => {
+  it('parses channels, normalizes names, resolves relative URLs and filters invalid items', async () => {
+    mockAxiosGet.mockResolvedValue({
+      status: 200,
+      data: {
+        data: [
+          { name: '央视 1 综合 高清', url: 'hls/cctv1.m3u8', typename: '央视频道' },
+          { name: 'CCTV5+体育赛事', url: 'http://example.com/cctv5plus.m3u8', typename: '体育' },
+          { name: '湖南卫视', url: 'first.m3u8,second.m3u8', typename: '卫视' },
+          { name: '', url: 'hls/empty-name.m3u8', typename: '其他' },
+          { name: '东方卫视', url: '', typename: '卫视' },
+        ],
+      },
+    });
+
+    const channels = await fetchAndParseJson('http://192.168.1.1:9901/iptv/live/1000.json?key=txiptv');
+
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://192.168.1.1:9901/iptv/live/1000.json?key=txiptv',
+      { timeout: 2000 }
+    );
+    expect(channels).toEqual([
+      {
+        name: 'CCTV1',
+        url: 'http://192.168.1.1:9901/hls/cctv1.m3u8',
+      },
+      {
+        name: 'CCTV5+',
+        url: 'http://example.com/cctv5plus.m3u8',
+      },
+    ]);
   });
 });
