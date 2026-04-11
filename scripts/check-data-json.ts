@@ -64,21 +64,21 @@ export async function build(options: GenOptions = {}) {
   const queueJson = new PQueue({ concurrency: options.concurrencyJson || CONCURRENCY_JSON });
   const aliveJsonUrls: string[] = [];
   let checked = 0;
-  await Promise.allSettled(
-    allJsonCandidates.map((url) =>
-      queueJson.add(async () => {
-        const res = await checkUrlAlive(url);
-        if (res) {
-          aliveJsonUrls.push(res);
-          console.log(`[可用] ${res}`);
-        }
-        checked++;
-        if (checked % 100 === 0) {
-          console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date(), getMemoryUsage());
-        }
-      })
-    )
+
+  allJsonCandidates.map((url) =>
+    queueJson.add(async () => {
+      const res = await checkUrlAlive(url);
+      if (res) {
+        aliveJsonUrls.push(res);
+        console.log(`[可用] ${res}`);
+      }
+      checked++;
+      if (checked % 100 === 0) {
+        console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date(), getMemoryUsage());
+      }
+    })
   );
+  await queueJson.onIdle();
   console.log(`\n可用 JSON 链接数: ${aliveJsonUrls.length}`);
 
   if (aliveJsonUrls.length === 0) {
@@ -110,21 +110,21 @@ export async function build(options: GenOptions = {}) {
   const queueStream = new PQueue({ concurrency: options.concurrencyStream || CONCURRENCY_STREAM });
   const okChannels: Channel[] = [];
   let done = 0;
-  await Promise.all(
-    allChannels.map((ch) =>
-      queueStream.add(async () => {
-        const result = await testStreamSpeed(ch);
-        if (result) {
-          okChannels.push(result);
-          console.log(`[可播] ${result.name} (${(result.speed! * 1024).toFixed(2)} MB/s)`);
-        }
-        done++;
-        if (done % 50 === 0) {
-          console.log(`测速进度: ${done}/${allChannels.length}`, new Date(), getMemoryUsage());
-        }
-      })
-    )
+
+  allChannels.map((ch) =>
+    queueStream.add(async () => {
+      const result = await testStreamSpeed(ch);
+      if (result) {
+        okChannels.push(result);
+        console.log(`[可播] ${result.name} (${(result.speed! * 1024).toFixed(2)} MB/s)`);
+      }
+      done++;
+      if (done % 50 === 0) {
+        console.log(`测速进度: ${done}/${allChannels.length}`, new Date(), getMemoryUsage());
+      }
+    })
   );
+  await queueStream.onIdle();
 
   console.log(`\n可播放频道数: ${okChannels.length}/${allChannels.length}`);
   // // 可选：把结果写到文件

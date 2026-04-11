@@ -8,7 +8,7 @@ vi.mock('axios', () => ({
 }));
 
 import axios from 'axios';
-import { fetchAndParseJson, generateModifiedIPs, toBaseUrl } from '../lib/utils';
+import { fetchAndParseJson, generateModifiedIPs, testStreamSpeed, toBaseUrl } from '../lib/utils';
 
 const mockAxiosGet = vi.mocked(axios.get);
 
@@ -79,5 +79,65 @@ describe('fetchAndParseJson', () => {
         url: 'http://example.com/cctv5plus.m3u8',
       },
     ]);
+  });
+});
+
+describe('testStreamSpeed', () => {
+  it('parses first segment duration from m3u8 and returns it with speed', async () => {
+    mockAxiosGet
+      .mockResolvedValueOnce({
+        status: 200,
+        data: '#EXTM3U\n#EXTINF:3.5,\nsegment001.ts\n',
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: new Uint8Array(1024 * 1024).buffer,
+      });
+
+    vi.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(3000);
+
+    const result = await testStreamSpeed({
+      name: 'CCTV1',
+      url: 'http://example.com/live/index.m3u8',
+    });
+
+    expect(mockAxiosGet).toHaveBeenNthCalledWith(1, 'http://example.com/live/index.m3u8', {
+      timeout: 1500,
+    });
+    expect(mockAxiosGet).toHaveBeenNthCalledWith(2, 'http://example.com/live/segment001.ts', {
+      responseType: 'arraybuffer',
+      timeout: 5000,
+    });
+    expect(result).toEqual({
+      name: 'CCTV1',
+      url: 'http://example.com/live/index.m3u8',
+      speed: 0.5,
+      segmentDuration: 3.5,
+      timeRatio: 1.75,
+    });
+  });
+
+  it('resolves root-relative ts path against origin', async () => {
+    mockAxiosGet
+      .mockResolvedValueOnce({
+        status: 200,
+        data: '#EXTM3U\n#EXTINF:4,\n/media/segment001.ts\n',
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: new Uint8Array(1024).buffer,
+      });
+
+    vi.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(2000);
+
+    await testStreamSpeed({
+      name: 'CCTV1',
+      url: 'http://example.com/live/index.m3u8',
+    });
+
+    expect(mockAxiosGet).toHaveBeenNthCalledWith(2, 'http://example.com/media/segment001.ts', {
+      responseType: 'arraybuffer',
+      timeout: 5000,
+    });
   });
 });

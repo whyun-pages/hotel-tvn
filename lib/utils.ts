@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import Bottleneck from 'bottleneck';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ParsedChannel } from '../types';
 import { Channel } from '../types';
 import path from 'path';
@@ -90,8 +90,8 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
 
     // 第 2 步：响应失败，或没有可解析的 data 字段时直接返回空数组
     if (res.status !== 200 || !res.data?.data) {
-return [];
-}
+      return [];
+    }
 
     // 第 3 步：提取当前 JSON 所在目录，用于补全相对地址
     const base = url.replace(/\/iptv\/live\/.*$/, '');
@@ -104,12 +104,12 @@ return [];
 
       // 跳过名称或播放地址为空的脏数据
       if (!name || !urlx) {
-continue;
-}
+        continue;
+      }
       // 跳过包含多个地址的聚合字段，避免后续解析异常
       if (urlx.includes(',')) {
-continue;
-}
+        continue;
+      }
 
       // 统一频道名称格式，便于后续分组、排序和去重
       name = name
@@ -157,6 +157,9 @@ continue;
         finalUrl = urlx;
       } else if (urlx.startsWith('/')) {
         finalUrl = base + urlx;
+      } else if (urlx.indexOf('://') !== -1) {
+        console.warn(`频道 ${name} 的 URL 字段 ${urlx} 格式异常，无法解析出有效地址，已跳过`);
+        continue;
       } else {
         finalUrl = base + '/' + urlx;
       }
@@ -179,18 +182,38 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
   try {
     const m3u8Res = await axios.get(url, { timeout: 1500 });
     if (m3u8Res.status !== 200) {
-throw new Error('m3u8 failed');
-}
+      throw new Error('m3u8 failed');
+    }
 
-    const lines = m3u8Res.data.split('\n').map((l: string) => l.trim());
-    const tsFiles = lines.filter((l: string) => !l.startsWith('#') && l);
+    let firstTsFile = '';
+    let segmentDuration: number | undefined;
+    let pendingDuration: number | undefined;
 
-    if (tsFiles.length === 0) {
-throw new Error('no ts');
-}
+    for (const rawLine of String(m3u8Res.data).split('\n')) {
+      const line = rawLine.trim();
+      if (!line) {
+        continue;
+      }
 
-    const base = url.substring(0, url.lastIndexOf('/') + 1);
-    const firstTs = base + tsFiles[0];
+      if (line.startsWith('#EXTINF:')) {
+        const durationText = line.slice('#EXTINF:'.length).split(',')[0]?.trim();
+        const parsedDuration = Number.parseFloat(durationText);
+        pendingDuration = Number.isFinite(parsedDuration) ? parsedDuration : undefined;
+        continue;
+      }
+
+      if (!line.startsWith('#')) {
+        // 取到第一个非注释行即第一个 ts 文件
+        firstTsFile = line;
+        segmentDuration = pendingDuration;
+        break;
+      }
+    }
+
+    if (!firstTsFile) {
+      throw new Error('no ts');
+    }
+    const firstTs = new URL(firstTsFile, url).toString();
 
     const start = Date.now();
     const tsRes = await axios.get(firstTs, {
@@ -200,14 +223,20 @@ throw new Error('no ts');
     const duration = (Date.now() - start) / 1000;
 
     if (duration < 0.05) {
-throw new Error('too fast');
-}
+      throw new Error('too fast');
+    }
 
     const sizeKB = tsRes.data.byteLength / 1024;
     const speedMBps = sizeKB / duration / 1024;
+    const timeRatio = segmentDuration ? segmentDuration / duration : 0;
 
-    return { name, url, speed: speedMBps };
-  } catch {
+    return { name, url, speed: speedMBps, segmentDuration, timeRatio };
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      console.warn(`请求失败: ${name} (${url})`, err.code, err.message, err.response?.status);
+    } else {
+      console.warn(`测速失败: ${name} (${url})`, err);
+    }
     return null;
   }
 }
@@ -237,14 +266,14 @@ export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
   for (const ch of tested) {
     let group: ChannelGroup = '其他';
     if (ch.name.includes('CCTV')) {
-group = 'CCTV';
-} else if (ch.name.includes('卫视')) {
-group = '卫视';
-}
+      group = 'CCTV';
+    } else if (ch.name.includes('卫视')) {
+      group = '卫视';
+    }
 
-    if (counters[group] >= RESULT_LIMIT_PER_CHANNEL) {
-continue;
-}
+    // if (counters[group] >= RESULT_LIMIT_PER_CHANNEL) {
+    //   continue;
+    // }
 
     groups[group].push(ch);
     counters[group]++;
@@ -263,35 +292,48 @@ continue;
           return nameCompare;
         }
       }
-      return (b.speed ?? 0) - (a.speed ?? 0);
+      return (b.timeRatio ?? 0) - (a.timeRatio ?? 0);
     });
   }
 
   // 生成 txt 文件
-  let txtContent = '央视频道,#genre#\n';
-  let m3u8Content = '#EXTM3U x-tvg-url="https://tv.whyun.com/epg/51zmt.xml"\n';
+  const txtStream = fs.createWriteStream(path.join(liveResultDir || '', 'lives.txt'));
+  const m3u8Stream = fs.createWriteStream(path.join(liveResultDir || '', 'lives.m3u'));
+  const txtStart = '央视频道,#genre#\n';
+  txtStream.write(txtStart);
+  const m3u8Start = '#EXTM3U x-tvg-url="https://tv.whyun.com/epg/51zmt.xml"\n';
+  m3u8Stream.write(m3u8Start);
   for (const ch of groups.CCTV) {
     const { txt, m3u8 } = genChannelContent('央视频道', ch);
-    txtContent += txt;
-    m3u8Content += m3u8;
+    txtStream.write(txt);
+    m3u8Stream.write(m3u8);
   }
 
-  txtContent += '卫视频道,#genre#\n';
+  txtStream.write('卫视频道,#genre#\n');
   for (const ch of groups.卫视) {
     const { txt, m3u8 } = genChannelContent('卫视频道', ch);
-    txtContent += txt;
-    m3u8Content += m3u8;
+    txtStream.write(txt);
+    m3u8Stream.write(m3u8);
   }
 
-  txtContent += '其他频道,#genre#\n';
+  txtStream.write('其他频道,#genre#\n');
   for (const ch of groups.其他) {
     const { txt, m3u8 } = genChannelContent('其他频道', ch);
-    txtContent += txt;
-    m3u8Content += m3u8;
+    txtStream.write(txt);
+    m3u8Stream.write(m3u8);
   }
-
-  await fs.writeFile(path.join(liveResultDir || '', 'lives.txt'), txtContent, 'utf-8');
-  await fs.writeFile(path.join(liveResultDir || '', 'lives.m3u'), m3u8Content, 'utf-8');
+  await Promise.all([
+    new Promise<void>((resolve, reject) => {
+      txtStream.on('finish', resolve);
+      txtStream.on('error', reject);
+      txtStream.end();
+    }),
+    new Promise<void>((resolve, reject) => {
+      m3u8Stream.on('finish', resolve);
+      m3u8Stream.on('error', reject);
+      m3u8Stream.end();
+    }),
+  ]);
 }
 /** 转换：http://A.B.C.D:port -> http://A.B.C.1:port */
 

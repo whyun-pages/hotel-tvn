@@ -6,3 +6,4 @@ data-check-result.json
 schedule-config.json
 docker/lives.*
 *.tar
+*.log

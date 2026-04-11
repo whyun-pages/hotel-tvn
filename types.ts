@@ -21,6 +21,11 @@ export interface Channel {
   name: string;
   url: string;
   speed?: number;
+  segmentDuration?: number;
+  /**
+   * 下载时长 / ts 文件时长
+   */
+  timeRatio?: number;
 }
 // interface ValidJsonResult {
 //   url: string;
