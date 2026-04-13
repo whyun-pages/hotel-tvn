@@ -23,7 +23,7 @@ import { Channel, GenOptions, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
 const DATA_JSON_PATH2 = path.join(__dirname, '../../../tv_service.json');
-const CONCURRENCY_JSON = 256;
+const CONCURRENCY_JSON = 512;
 const CONCURRENCY_STREAM = 64;
 
 export async function build(options: GenOptions = {}) {
@@ -59,6 +59,14 @@ export async function build(options: GenOptions = {}) {
     allJsonCandidates.push(...generateModifiedIPs(base));
   }
   console.log(`共生成 ${allJsonCandidates.length} 个 JSON 候选链接`);
+  allJsonCandidates.sort((a, b) => {
+    const urlA = new URL(a);
+    const urlB = new URL(b);
+    const hostnameA = urlA.hostname.split('.').slice(-1)[0];
+    const hostnameB = urlB.hostname.split('.').slice(-1)[0];
+
+    return hostnameA.localeCompare(hostnameB);
+  });
 
   // 3. 检测 JSON 链接可用性
   const queueJson = new PQueue({ concurrency: options.concurrencyJson || CONCURRENCY_JSON });
