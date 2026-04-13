@@ -194,7 +194,7 @@ You can paste the **lives.m3u** URL into an IPTV app, or open **lives.txt** in a
 | `LIVE_RESULT_DIR`    | Directory for **lives.txt** and **lives.m3u** (default: `/app`).               |
 | `CONCURRENCY_JSON`   | Concurrency for JSON URL checks.                                               |
 | `CONCURRENCY_STREAM` | Concurrency for stream speed tests.                                            |
-| `MIN_RATIO_TOLERANCE` | Minimum accepted `timeRatio` for a stream test (default: `0.49`). A channel is skipped when `timeRatio` is lower than this threshold. |
+| `MIN_RATIO_TOLERANCE` | Minimum accepted `timeRatio` for a stream test (default: `0.99`). A channel is skipped when `timeRatio` is lower than this threshold. |
 
 The scheduled task reads `schedule-config.json` generated from these variables (you can generate this config at container startup if needed).
 
