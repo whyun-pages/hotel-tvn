@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import Bottleneck from 'bottleneck';
+// import Bottleneck from 'bottleneck';
 import axios, { AxiosError } from 'axios';
 import { ParsedChannel } from '../types';
 import { Channel } from '../types';
@@ -10,10 +10,10 @@ const DOWNLOAD_TIMEOUT = 5000;
 export const RESULT_LIMIT_PER_CHANNEL = 1024;
 
 // 限流器
-const limiter = new Bottleneck({
-  maxConcurrent: 30,
-  minTime: 150,
-});
+// const limiter = new Bottleneck({
+//   maxConcurrent: 30,
+//   minTime: 150,
+// });
 
 const jsonUrls = [
   'http://183.223.157.33:9901/iptv/live/1000.json?key=txiptv',
@@ -26,7 +26,7 @@ interface ChannelItem {
 }
 type ChannelGroup = 'CCTV' | '卫视' | '其他';
 
-const MIN_RATIO_TOLERANCE = Number(process.env.MIN_RATIO_TOLERANCE) || 0.5;
+const MIN_RATIO_TOLERANCE = Number(process.env.MIN_RATIO_TOLERANCE) || 0.49;
 
 /**
  * 根据基础 IP 生成 1~255 的所有候选地址
@@ -49,7 +49,7 @@ export function generateModifiedIPs(baseUrl: string): string[] {
  */
 export async function checkUrlAlive(url: string): Promise<string | null> {
   try {
-    const res = await limiter.schedule(() => axios.head(url, { timeout: REQUEST_TIMEOUT }));
+    const res = await axios.head(url, { timeout: REQUEST_TIMEOUT });
     if (res.status === 200) {
       return url;
     }
