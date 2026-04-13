@@ -26,6 +26,8 @@ interface ChannelItem {
 }
 type ChannelGroup = 'CCTV' | '卫视' | '其他';
 
+const MIN_RATIO_TOLERANCE = 0.8;
+
 /**
  * 根据基础 IP 生成 1~255 的所有候选地址
  */
@@ -227,10 +229,15 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
     }
 
     const sizeKB = tsRes.data.byteLength / 1024;
-    const speedMBps = sizeKB / duration / 1024;
+    const speedMBps = (sizeKB / duration / 1024).toFixed(2);
     const timeRatio = segmentDuration ? segmentDuration / duration : 0;
-
-    return { name, url, speed: speedMBps, segmentDuration, timeRatio };
+    if (timeRatio < MIN_RATIO_TOLERANCE) {
+      console.warn(
+        `频道 ${name} 的 ts 播放过于卡顿，时间比 ${timeRatio.toFixed(2)} 低于容忍阈值 ${MIN_RATIO_TOLERANCE}，已跳过`
+      );
+      return null;
+    }
+    return { name, url, speed: speedMBps, segmentDuration, timeRatio: timeRatio.toFixed(2) };
   } catch (err) {
     if (err instanceof AxiosError) {
       console.warn(`请求失败: ${name} (${url})`, err.code, err.message, err.response?.status);
@@ -292,7 +299,7 @@ export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
           return nameCompare;
         }
       }
-      return (b.timeRatio ?? 0) - (a.timeRatio ?? 0);
+      return (Number(b.timeRatio) || 0) - (Number(a.timeRatio) || 0);
     });
   }
 

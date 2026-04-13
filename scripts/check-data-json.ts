@@ -74,7 +74,11 @@ export async function build(options: GenOptions = {}) {
       }
       checked++;
       if (checked % 100 === 0) {
-        console.log(`检测进度: ${checked}/${allJsonCandidates.length}`, new Date(), getMemoryUsage());
+        console.log(
+          `检测进度: ${checked}/${allJsonCandidates.length}`,
+          new Date(),
+          getMemoryUsage()
+        );
       }
     })
   );
@@ -116,7 +120,9 @@ export async function build(options: GenOptions = {}) {
       const result = await testStreamSpeed(ch);
       if (result) {
         okChannels.push(result);
-        console.log(`[可播] ${result.name} (${(result.speed! * 1024).toFixed(2)} MB/s)`);
+        console.log(
+          `[可播] ${result.name} (${result.speed!} MB/s), time ratio: ${result.timeRatio}`
+        );
       }
       done++;
       if (done % 50 === 0) {

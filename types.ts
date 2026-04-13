@@ -20,12 +20,12 @@ export interface GenOptions {
 export interface Channel {
   name: string;
   url: string;
-  speed?: number;
+  speed?: string;
   segmentDuration?: number;
   /**
    * 下载时长 / ts 文件时长
    */
-  timeRatio?: number;
+  timeRatio?: string;
 }
 // interface ValidJsonResult {
 //   url: string;
