@@ -111,9 +111,9 @@ describe('testStreamSpeed', () => {
     expect(result).toEqual({
       name: 'CCTV1',
       url: 'http://example.com/live/index.m3u8',
-      speed: 0.5,
+      speed: '0.50',
       segmentDuration: 3.5,
-      timeRatio: 1.75,
+      timeRatio: '1.75',
     });
   });
 
