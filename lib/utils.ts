@@ -26,7 +26,7 @@ interface ChannelItem {
 }
 type ChannelGroup = 'CCTV' | '卫视' | '其他';
 
-const MIN_RATIO_TOLERANCE = 0.8;
+const MIN_RATIO_TOLERANCE = Number(process.env.MIN_RATIO_TOLERANCE) || 0.5;
 
 /**
  * 根据基础 IP 生成 1~255 的所有候选地址
