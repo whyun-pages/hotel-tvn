@@ -23,7 +23,7 @@ import { Channel, GenOptions, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
 const DATA_JSON_PATH2 = path.join(__dirname, '../../../tv_service.json');
-const CONCURRENCY_JSON = 512;
+const CONCURRENCY_JSON = 1024;
 const CONCURRENCY_STREAM = 64;
 
 export async function build(options: GenOptions = {}) {
