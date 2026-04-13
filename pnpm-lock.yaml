@@ -11,9 +11,6 @@ importers:
       axios:
         specifier: ^1.13.5
         version: 1.13.5
-      bottleneck:
-        specifier: ^2.19.5
-        version: 2.19.5
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -880,9 +877,6 @@ packages:
 
   blake3-wasm@2.1.5:
     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
-
-  bottleneck@2.19.5:
-    resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
 
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
@@ -2283,8 +2277,6 @@ snapshots:
   balanced-match@4.0.4: {}
 
   blake3-wasm@2.1.5: {}
-
-  bottleneck@2.19.5: {}
 
   brace-expansion@2.0.2:
     dependencies:
