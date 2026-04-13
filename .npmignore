@@ -13,3 +13,4 @@ docker/
 .cnb.yml
 output/
 *.tar
+channels.json

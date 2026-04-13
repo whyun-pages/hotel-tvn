@@ -40,7 +40,7 @@ resources:
           exit 1
         fi
         mkdir -p output
-        cp lives.txt lives.m3u output/
+        cp lives.txt lives.m3u channels.json output/
         ./.cnb/upload.sh
         
 

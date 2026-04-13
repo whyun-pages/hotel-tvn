@@ -7,3 +7,4 @@ schedule-config.json
 docker/lives.*
 *.tar
 *.log
+channels.json

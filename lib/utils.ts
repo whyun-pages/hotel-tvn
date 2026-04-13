@@ -340,6 +340,11 @@ export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
       m3u8Stream.on('error', reject);
       m3u8Stream.end();
     }),
+    fs.writeFile(
+      path.join(liveResultDir || '', 'channels.json'),
+      JSON.stringify(groups, null, 2),
+      'utf-8'
+    ),
   ]);
 }
 /** 转换：http://A.B.C.D:port -> http://A.B.C.1:port */
