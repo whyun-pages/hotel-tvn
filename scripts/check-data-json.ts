@@ -7,9 +7,8 @@
  * 5. 用 testStreamSpeed 检测每个频道链接是否可访问
  * 6. 生成 lives.txt 和 lives.m3u8
  */
-import { readFile } from 'fs/promises';
-import * as path from 'path';
-import PQueue from 'p-queue';
+import fs from 'node:fs';
+import * as path from 'node:path';
 import {
   generateModifiedIPs,
   checkUrlAlive,
@@ -19,6 +18,7 @@ import {
   genLiveFiles,
   getMemoryUsage,
 } from '../lib/utils';
+import { runWithConcurrency } from '../lib/concurrency';
 import { Channel, GenOptions, TvServiceItem } from '../types';
 
 const DATA_JSON_PATH = path.join(__dirname, '../tv_service.json');
@@ -29,12 +29,12 @@ const CONCURRENCY_STREAM = Number(process.env.CONCURRENCY_STREAM) || 16;
 export async function build(options: GenOptions = {}) {
   let raw: string;
   if (options.dataJsonPath) {
-    raw = await readFile(options.dataJsonPath, 'utf-8');
+    raw = fs.readFileSync(options.dataJsonPath, 'utf-8');
   } else {
     try {
-      raw = await readFile(DATA_JSON_PATH, 'utf-8');
+      raw = fs.readFileSync(DATA_JSON_PATH, 'utf-8');
     } catch (_error) {
-      raw = await readFile(DATA_JSON_PATH2, 'utf-8');
+      raw = fs.readFileSync(DATA_JSON_PATH2, 'utf-8');
     }
   }
   const urls: string[] = JSON.parse(raw);
@@ -69,12 +69,13 @@ export async function build(options: GenOptions = {}) {
   });
 
   // 3. 检测 JSON 链接可用性
-  const queueJson = new PQueue({ concurrency: options.concurrencyJson || CONCURRENCY_JSON });
   const aliveJsonUrls: string[] = [];
   let checked = 0;
 
-  allJsonCandidates.map((url) =>
-    queueJson.add(async () => {
+  await runWithConcurrency(
+    allJsonCandidates,
+    options.concurrencyJson || CONCURRENCY_JSON,
+    async (url) => {
       const res = await checkUrlAlive(url);
       if (res) {
         aliveJsonUrls.push(res);
@@ -88,9 +89,8 @@ export async function build(options: GenOptions = {}) {
           getMemoryUsage()
         );
       }
-    })
+    }
   );
-  await queueJson.onIdle();
   console.log(`\n可用 JSON 链接数: ${aliveJsonUrls.length}`);
 
   if (aliveJsonUrls.length === 0) {
@@ -119,12 +119,13 @@ export async function build(options: GenOptions = {}) {
   }
 
   // 5. 测速检测频道是否可访问
-  const queueStream = new PQueue({ concurrency: options.concurrencyStream || CONCURRENCY_STREAM });
   const okChannels: Channel[] = [];
   let done = 0;
 
-  allChannels.map((ch) =>
-    queueStream.add(async () => {
+  await runWithConcurrency(
+    allChannels,
+    options.concurrencyStream || CONCURRENCY_STREAM,
+    async (ch) => {
       const result = await testStreamSpeed(ch);
       if (result) {
         okChannels.push(result);
@@ -136,9 +137,8 @@ export async function build(options: GenOptions = {}) {
       if (done % 50 === 0) {
         console.log(`测速进度: ${done}/${allChannels.length}`, new Date(), getMemoryUsage());
       }
-    })
+    }
   );
-  await queueStream.onIdle();
 
   console.log(`\n可播放频道数: ${okChannels.length}/${allChannels.length}`);
   // // 可选：把结果写到文件

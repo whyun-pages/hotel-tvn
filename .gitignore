@@ -1,5 +1,6 @@
 node_modules
 dist
+.perry-cache/
 output/
 .env
 data-check-result.json
@@ -7,4 +8,7 @@ schedule-config.json
 docker/lives.*
 *.tar
 *.log
+*.o
+*.exp
+*.lib
 channels.json

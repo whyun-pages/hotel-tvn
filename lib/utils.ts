@@ -1,13 +1,34 @@
-import fs from 'fs-extra';
+import fs from 'node:fs';
 // import Bottleneck from 'bottleneck';
-import axios, { AxiosError } from 'axios';
 import { ParsedChannel } from '../types';
 import { Channel } from '../types';
-import path from 'path';
+import path from 'node:path';
 
 const REQUEST_TIMEOUT = 800;
 const DOWNLOAD_TIMEOUT = 5000;
 export const RESULT_LIMIT_PER_CHANNEL = 1024;
+
+type AbortControllerConstructor = new () => AbortController;
+
+function createTimeoutSignal(timeout: number) {
+  const AbortControllerCtor = (globalThis as typeof globalThis & {
+    AbortController?: AbortControllerConstructor;
+  }).AbortController;
+  if (!AbortControllerCtor) {
+    return undefined;
+  }
+
+  const controller = new AbortControllerCtor();
+  setTimeout(() => controller.abort(), timeout);
+  return controller.signal;
+}
+
+function fetchWithTimeout(url: string, init: RequestInit | undefined, timeout: number) {
+  return fetch(url, {
+    ...init,
+    signal: createTimeoutSignal(timeout),
+  });
+}
 
 // 限流器
 // const limiter = new Bottleneck({
@@ -25,6 +46,55 @@ interface ChannelItem {
   typename: string;
 }
 type ChannelGroup = 'CCTV' | '卫视' | '其他';
+
+const CHANNEL_NAME_REPLACEMENTS: Array<[RegExp | string, string]> = [
+  [/cctv/gi, 'CCTV'],
+  [/(中央|央视)/g, 'CCTV'],
+  [/高清|超高|HD|标清|频道|-|—|\s/g, ''],
+  [/＋/g, '+'],
+  [/[()]/g, ''],
+  [/PLUS/gi, '+'],
+  [/CCTV(\d+)台/, 'CCTV$1'],
+  [/CCTV5\+体育(?:赛事|赛视)?/, 'CCTV5+'],
+  ['CCTV1综合', 'CCTV1'],
+  ['CCTV2财经', 'CCTV2'],
+  ['CCTV3综艺', 'CCTV3'],
+  ['CCTV4国际', 'CCTV4'],
+  ['CCTV4中文国际', 'CCTV4'],
+  ['CCTV4欧洲', 'CCTV4'],
+  ['CCTV5体育', 'CCTV5'],
+  ['CCTV6电影', 'CCTV6'],
+  ['CCTV7军事', 'CCTV7'],
+  ['CCTV7军农', 'CCTV7'],
+  ['CCTV7农业', 'CCTV7'],
+  ['CCTV7国防军事', 'CCTV7'],
+  ['CCTV8电视剧', 'CCTV8'],
+  ['CCTV9记录', 'CCTV9'],
+  ['CCTV9纪录', 'CCTV9'],
+  ['CCTV10科教', 'CCTV10'],
+  ['CCTV11戏曲', 'CCTV11'],
+  ['CCTV12社会与法', 'CCTV12'],
+  ['CCTV13新闻', 'CCTV13'],
+  ['CCTV新闻', 'CCTV13'],
+  ['CCTV14少儿', 'CCTV14'],
+  ['CCTV少儿', 'CCTV14'],
+  ['CCTV15音乐', 'CCTV15'],
+  ['CCTV音乐', 'CCTV15'],
+  ['CCTV16奥林匹克', 'CCTV16'],
+  ['CCTV17农业农村', 'CCTV17'],
+  ['CCTV17农村农业', 'CCTV17'],
+  ['CCTV17农业', 'CCTV17'],
+  ['CCTVCCTV台球', 'CCTV台球'],
+  ['上海卫视', '东方卫视'],
+];
+
+function normalizeChannelName(name: string) {
+  let normalized = name;
+  for (const [pattern, replacement] of CHANNEL_NAME_REPLACEMENTS) {
+    normalized = normalized.replace(pattern, replacement);
+  }
+  return normalized;
+}
 
 const MIN_RATIO_TOLERANCE = Number(process.env.MIN_RATIO_TOLERANCE) || 0.99;
 
@@ -49,11 +119,17 @@ export function generateModifiedIPs(baseUrl: string): string[] {
  */
 export async function checkUrlAlive(url: string): Promise<string | null> {
   try {
-    const res = await axios.head(url, { timeout: REQUEST_TIMEOUT });
+    const res = await fetchWithTimeout(
+      url,
+      {
+      method: 'HEAD',
+      },
+      REQUEST_TIMEOUT
+    );
     if (res.status === 200) {
       return url;
     }
-    console.log(`${url} is not alive, status: ${res.status}, ${res.data}`);
+    console.log(`${url} is not alive, status: ${res.status}`);
   } catch (_e) {
     // console.log(`${url} is not alive, error: ${e}`);
     // 静默失败
@@ -88,10 +164,11 @@ export async function getValidJsonUrlsFromLocalUrls(): Promise<string[]> {
 export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
   try {
     // 第 1 步：请求远端 JSON 数据
-    const res = await axios.get(url, { timeout: 2000 });
+    const res = await fetchWithTimeout(url, undefined, 2000);
+    const data = (await res.json()) as { data?: ChannelItem[] };
 
     // 第 2 步：响应失败，或没有可解析的 data 字段时直接返回空数组
-    if (res.status !== 200 || !res.data?.data) {
+    if (res.status !== 200 || !data.data) {
       return [];
     }
 
@@ -100,7 +177,7 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
     const items: ParsedChannel[] = [];
 
     // 第 4 步：遍历原始频道项，逐条过滤并转换为统一结构
-    for (const it of (res.data.data as ChannelItem[]) || []) {
+    for (const it of data.data || []) {
       let name = String(it.name || '').trim();
       const urlx = String(it.url || '').trim();
 
@@ -114,44 +191,7 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
       }
 
       // 统一频道名称格式，便于后续分组、排序和去重
-      name = name
-        .replace(/cctv/gi, 'CCTV')
-        .replace(/(中央|央视)/g, 'CCTV')
-        .replace(/高清|超高|HD|标清|频道|-|—|\s/g, '')
-        .replace(/[＋()]/g, (s) => (s === '＋' ? '+' : ''))
-        .replace(/PLUS/gi, '+')
-        .replace(/CCTV(\d+)台/, 'CCTV$1')
-        .replace(/CCTV5\+体育(?:赛事|赛视)?/, 'CCTV5+')
-        .replace('CCTV1综合', 'CCTV1')
-        .replace('CCTV2财经', 'CCTV2')
-        .replace('CCTV3综艺', 'CCTV3')
-        .replace('CCTV4国际', 'CCTV4')
-        .replace('CCTV4中文国际', 'CCTV4')
-        .replace('CCTV4欧洲', 'CCTV4')
-        .replace('CCTV5体育', 'CCTV5')
-        .replace('CCTV6电影', 'CCTV6')
-        .replace('CCTV7军事', 'CCTV7')
-        .replace('CCTV7军农', 'CCTV7')
-        .replace('CCTV7农业', 'CCTV7')
-        .replace('CCTV7国防军事', 'CCTV7')
-        .replace('CCTV8电视剧', 'CCTV8')
-        .replace('CCTV9记录', 'CCTV9')
-        .replace('CCTV9纪录', 'CCTV9')
-        .replace('CCTV10科教', 'CCTV10')
-        .replace('CCTV11戏曲', 'CCTV11')
-        .replace('CCTV12社会与法', 'CCTV12')
-        .replace('CCTV13新闻', 'CCTV13')
-        .replace('CCTV新闻', 'CCTV13')
-        .replace('CCTV14少儿', 'CCTV14')
-        .replace('CCTV少儿', 'CCTV14')
-        .replace('CCTV15音乐', 'CCTV15')
-        .replace('CCTV音乐', 'CCTV15')
-        .replace('CCTV16奥林匹克', 'CCTV16')
-        .replace('CCTV17农业农村', 'CCTV17')
-        .replace('CCTV17农村农业', 'CCTV17')
-        .replace('CCTV17农业', 'CCTV17')
-        .replace('CCTVCCTV台球', 'CCTV台球')
-        .replace('上海卫视', '东方卫视');
+      name = normalizeChannelName(name);
 
       // 第 5 步：将相对地址补全为绝对地址，并写入最终结果
       let finalUrl = urlx;
@@ -182,7 +222,7 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
   const { name, url } = channel;
 
   try {
-    const m3u8Res = await axios.get(url, { timeout: 1500 });
+    const m3u8Res = await fetchWithTimeout(url, undefined, 1500);
     if (m3u8Res.status !== 200) {
       throw new Error('m3u8 failed');
     }
@@ -191,7 +231,8 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
     let segmentDuration: number | undefined;
     let pendingDuration: number | undefined;
 
-    for (const rawLine of String(m3u8Res.data).split('\n')) {
+    const m3u8Text = await m3u8Res.text();
+    for (const rawLine of m3u8Text.split('\n')) {
       const line = rawLine.trim();
       if (!line) {
         continue;
@@ -218,17 +259,14 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
     const firstTs = new URL(firstTsFile, url).toString();
 
     const start = Date.now();
-    const tsRes = await axios.get(firstTs, {
-      responseType: 'arraybuffer',
-      timeout: DOWNLOAD_TIMEOUT,
-    });
+    const tsRes = await fetchWithTimeout(firstTs, undefined, DOWNLOAD_TIMEOUT);
     const duration = (Date.now() - start) / 1000;
 
     if (duration < 0.05) {
       throw new Error('too fast');
     }
 
-    const sizeKB = tsRes.data.byteLength / 1024;
+    const sizeKB = (await tsRes.arrayBuffer()).byteLength / 1024;
     const speedMBps = (sizeKB / duration / 1024).toFixed(2);
     const timeRatio = segmentDuration ? segmentDuration / duration : 0;
     if (timeRatio < MIN_RATIO_TOLERANCE) {
@@ -239,8 +277,8 @@ export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel |
     }
     return { name, url, speed: speedMBps, segmentDuration, timeRatio: timeRatio.toFixed(2) };
   } catch (err) {
-    if (err instanceof AxiosError) {
-      console.warn(`请求失败: ${name} (${url})`, err.code, err.message, err.response?.status);
+    if (err instanceof Error) {
+      console.warn(`请求失败: ${name} (${url})`, err.name, err.message);
     } else {
       console.warn(`测速失败: ${name} (${url})`, err);
     }
@@ -340,11 +378,20 @@ export async function genLiveFiles(tested: Channel[], liveResultDir?: string) {
       m3u8Stream.on('error', reject);
       m3u8Stream.end();
     }),
-    fs.writeFile(
-      path.join(liveResultDir || '', 'channels.json'),
-      JSON.stringify(groups, null, 2),
-      'utf-8'
-    ),
+    new Promise<void>((resolve, reject) => {
+      fs.writeFile(
+        path.join(liveResultDir || '', 'channels.json'),
+        JSON.stringify(groups, null, 2),
+        'utf-8',
+        (error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        }
+      );
+    }),
   ]);
 }
 /** 转换：http://A.B.C.D:port -> http://A.B.C.1:port */

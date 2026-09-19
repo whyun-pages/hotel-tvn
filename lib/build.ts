@@ -1,4 +1,3 @@
-import PQueue from 'p-queue';
 import { ParsedChannel, Channel } from '../types';
 import {
   fetchAndParseJson,
@@ -6,6 +5,7 @@ import {
   getValidJsonUrlsFromLocalUrls,
   genLiveFiles,
 } from './utils';
+import { runWithConcurrency } from './concurrency';
 
 export async function build() {
   console.log('开始收集有效 JSON 地址...');
@@ -13,34 +13,25 @@ export async function build() {
   console.log(`找到 ${validJsonUrls.length} 个可能有效的 JSON`);
 
   const allChannels: ParsedChannel[] = [];
-  const queue = new PQueue({ concurrency: 20 });
-
-  for (const jsonUrl of validJsonUrls) {
-    queue.add(async () => {
-      const chans = await fetchAndParseJson(jsonUrl);
-      allChannels.push(...chans);
-      console.log(`从 ${jsonUrl} 获得 ${chans.length} 个频道`);
-    });
-  }
-
-  await queue.onIdle();
+  await runWithConcurrency(validJsonUrls, 20, async (jsonUrl) => {
+    const chans = await fetchAndParseJson(jsonUrl);
+    allChannels.push(...chans);
+    console.log(`从 ${jsonUrl} 获得 ${chans.length} 个频道`);
+  });
 
   console.log(`共收集到 ${allChannels.length} 个原始频道，开始测速...`);
 
   const tested: Channel[] = [];
-  const testQueue = new PQueue({ concurrency: 15 });
-
-  for (const ch of allChannels) {
-    testQueue.add(async () => {
-      const result = await testStreamSpeed(ch);
-      if (result) {
-        tested.push(result);
-        console.log(`可用 ${tested.length} | ${result.name} → ${result.speed!.toFixed(2)} MB/s`, process.memoryUsage());
-      }
-    });
-  }
-
-  await testQueue.onIdle();
+  await runWithConcurrency(allChannels, 15, async (ch) => {
+    const result = await testStreamSpeed(ch);
+    if (result) {
+      tested.push(result);
+      console.log(
+        `可用 ${tested.length} | ${result.name} → ${result.speed!.toFixed(2)} MB/s`,
+        process.memoryUsage()
+      );
+    }
+  });
 
   await genLiveFiles(tested);
 

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { fetchAndParseJson } from '../lib/utils';
 
@@ -12,11 +11,14 @@ describe('fetchAndParseJson live', () => {
   it.runIf(process.env.RUN_LIVE_TESTS === '1')(
     'requests the real JSON endpoint and returns parsed channels',
     async () => {
-      const getSpy = vi.spyOn(axios, 'get');
+      const fetchSpy = vi.spyOn(globalThis, 'fetch');
 
       const channels = await fetchAndParseJson(LIVE_JSON_URL);
 
-      expect(getSpy).toHaveBeenCalledWith(LIVE_JSON_URL, { timeout: 2000 });
+      expect(fetchSpy).toHaveBeenCalledWith(
+        LIVE_JSON_URL,
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
       expect(Array.isArray(channels)).toBe(true);
 
       if (channels.length > 0) {

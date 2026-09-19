@@ -1,19 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('axios', () => ({
-  default: {
-    get: vi.fn(),
-    head: vi.fn(),
-  },
-}));
-
-import axios from 'axios';
 import { fetchAndParseJson, generateModifiedIPs, testStreamSpeed, toBaseUrl } from '../lib/utils';
 
-const mockAxiosGet = vi.mocked(axios.get);
+const mockFetch = vi.fn<typeof fetch>();
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.restoreAllMocks();
+  mockFetch.mockReset();
+  vi.stubGlobal('fetch', mockFetch);
 });
 
 describe('generateModifiedIPs', () => {
@@ -50,9 +44,9 @@ describe('toBaseUrl', () => {
 
 describe('fetchAndParseJson', () => {
   it('parses channels, normalizes names, resolves relative URLs and filters invalid items', async () => {
-    mockAxiosGet.mockResolvedValue({
+    mockFetch.mockResolvedValue({
       status: 200,
-      data: {
+      json: async () => ({
         data: [
           { name: '央视 1 综合 高清', url: 'hls/cctv1.m3u8', typename: '央视频道' },
           { name: 'CCTV5+体育赛事', url: 'http://example.com/cctv5plus.m3u8', typename: '体育' },
@@ -60,14 +54,14 @@ describe('fetchAndParseJson', () => {
           { name: '', url: 'hls/empty-name.m3u8', typename: '其他' },
           { name: '东方卫视', url: '', typename: '卫视' },
         ],
-      },
-    });
+      }),
+    } as Response);
 
     const channels = await fetchAndParseJson('http://192.168.1.1:9901/iptv/live/1000.json?key=txiptv');
 
-    expect(mockAxiosGet).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       'http://192.168.1.1:9901/iptv/live/1000.json?key=txiptv',
-      { timeout: 2000 }
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
     expect(channels).toEqual([
       {
@@ -84,15 +78,15 @@ describe('fetchAndParseJson', () => {
 
 describe('testStreamSpeed', () => {
   it('parses first segment duration from m3u8 and returns it with speed', async () => {
-    mockAxiosGet
+    mockFetch
       .mockResolvedValueOnce({
         status: 200,
-        data: '#EXTM3U\n#EXTINF:3.5,\nsegment001.ts\n',
-      })
+        text: async () => '#EXTM3U\n#EXTINF:3.5,\nsegment001.ts\n',
+      } as Response)
       .mockResolvedValueOnce({
         status: 200,
-        data: new Uint8Array(1024 * 1024).buffer,
-      });
+        arrayBuffer: async () => new Uint8Array(1024 * 1024).buffer,
+      } as Response);
 
     vi.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(3000);
 
@@ -101,13 +95,16 @@ describe('testStreamSpeed', () => {
       url: 'http://example.com/live/index.m3u8',
     });
 
-    expect(mockAxiosGet).toHaveBeenNthCalledWith(1, 'http://example.com/live/index.m3u8', {
-      timeout: 1500,
-    });
-    expect(mockAxiosGet).toHaveBeenNthCalledWith(2, 'http://example.com/live/segment001.ts', {
-      responseType: 'arraybuffer',
-      timeout: 5000,
-    });
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      'http://example.com/live/index.m3u8',
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      'http://example.com/live/segment001.ts',
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
     expect(result).toEqual({
       name: 'CCTV1',
       url: 'http://example.com/live/index.m3u8',
@@ -118,15 +115,15 @@ describe('testStreamSpeed', () => {
   });
 
   it('resolves root-relative ts path against origin', async () => {
-    mockAxiosGet
+    mockFetch
       .mockResolvedValueOnce({
         status: 200,
-        data: '#EXTM3U\n#EXTINF:4,\n/media/segment001.ts\n',
-      })
+        text: async () => '#EXTM3U\n#EXTINF:4,\n/media/segment001.ts\n',
+      } as Response)
       .mockResolvedValueOnce({
         status: 200,
-        data: new Uint8Array(1024).buffer,
-      });
+        arrayBuffer: async () => new Uint8Array(1024).buffer,
+      } as Response);
 
     vi.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(2000);
 
@@ -135,9 +132,10 @@ describe('testStreamSpeed', () => {
       url: 'http://example.com/live/index.m3u8',
     });
 
-    expect(mockAxiosGet).toHaveBeenNthCalledWith(2, 'http://example.com/media/segment001.ts', {
-      responseType: 'arraybuffer',
-      timeout: 5000,
-    });
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      'http://example.com/media/segment001.ts',
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
   });
 });

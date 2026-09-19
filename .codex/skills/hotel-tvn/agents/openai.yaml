@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hotel TVN"
+  short_description: "Work on hotel-tvn Perry-compatible Node/TypeScript tooling."
+  default_prompt: "Use this skill when modifying the hotel-tvn project, especially Perry local compilation, CLI entrypoints, runtime dependencies, tests, or generated artifacts."

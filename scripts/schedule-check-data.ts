@@ -1,10 +1,10 @@
-import fs from 'node:fs/promises';
+import fs from 'node:fs';
 import { GenOptions } from '../types';
 import { build } from './check-data-json';
 async function main() {
   let configJson: string | undefined;
   try {
-    configJson = await fs.readFile('schedule-config.json', 'utf-8');
+    configJson = fs.readFileSync('schedule-config.json', 'utf-8');
   } catch (error) {
     console.warn('读取 schedule-config.json 失败', error);
   }
