@@ -1,0 +1,29 @@
+{
+  "code": 0,
+  "message": "Successful.",
+  "data": [
+    {
+      "ip": "192.*.*.*",
+      "port": 9901,
+      "location": { "province_cn": "广西壮族自治区", "city_cn": "南宁市", "province_en": "Guangxi", "city_en": "Nanning City" },
+      "id": "192.168.1.100_9901_tcp"
+    },
+    {
+      "ip": "10.0.0.50",
+      "port": 8181,
+      "location": { "province_cn": "陕西省", "city_cn": "西安市" }
+    },
+    {
+      "ip": "192.*.*.*",
+      "port": 9901,
+      "location": { "province_cn": "广西壮族自治区", "city_cn": "南宁市" },
+      "id": "192.168.1.100_9901_tcp"
+    },
+    {
+      "ip": "172.*.*.*",
+      "port": 10000,
+      "location": {}
+    }
+  ],
+  "meta": { "pagination": { "count": 4, "page_index": 1, "page_size": 10, "total": 4 } }
+}

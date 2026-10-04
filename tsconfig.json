@@ -4,6 +4,7 @@
     "module": "commonjs",
     "outDir": "./dist/cjs",
     "rootDir": "./",
+    "types": ["node"],
     "strict": true,
     "declaration": true,
     "declarationMap": true,

@@ -1,0 +1,51 @@
+# 定时任务：每月从 Quake 拉取一次数据，更新 tv_service.json 并提交
+name: Quake
+on:
+  schedule:
+    - cron: '17 0 1 * *' # 每月 1 日执行一次（UTC 0:17）
+  workflow_dispatch: # 开启手动触发
+jobs:
+  update-tv-service:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install Dependencies
+        run: |
+          pnpm install
+
+      - name: Build
+        run: |
+          pnpm build
+
+      # 只请求一次，取 100 条
+      - name: Fetch Quake Data
+        env:
+          QUAKE_TOKEN: ${{ secrets.QUAKE_TOKEN }}
+        run: |
+          node dist/cjs/clis/sgen.js fetch-quake \
+            --query 'response:"/iptv/live/" AND country:"China"' \
+            --start 0 --size 100 --max 100 --max-pages 1 \
+            -o tv_service.json
+
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update tv_service.json from quake [skip ci]"
+          file_pattern: 'tv_service.json'
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"

@@ -84,6 +84,39 @@ sgen parse-result-json -i ./my_result.json -o ./my_tv_service.json
 | `--input-json-path <path>`  | `-i`  | Path to input result.json (default: `dist/result.json`).     |
 | `--output-json-path <path>` | `-o`  | Path to output tv_service.json (default: `tv_service.json`). |
 
+### Use Quake as the data source
+
+**sgen** can also build **tv_service.json** from [Quake](https://quake.360.net/) search results. Because low-privilege accounts get a masked `ip` field (e.g. `36.*.*.*`), the real IP and port are taken from the `id` field (e.g. `36.136.38.87_9901_tcp`). `province` / `city` use the Chinese names (`province_cn` / `city_cn`).
+
+Fetch directly from the Quake API (the token is read from `--token` or the `QUAKE_TOKEN` environment variable):
+
+```bash
+# Defaults: query 'response:"/iptv/live/" AND country:"China"', size 100, max 100
+QUAKE_TOKEN=xxx sgen fetch-quake
+
+# Custom query / paging, and keep the raw Quake result
+sgen fetch-quake -q 'response:"/iptv/live/" AND country:"China"' --size 100 --max 500 -r ./quake-result.json -o ./tv_service.json
+```
+
+| Option                      | Short | Description                                                    |
+| --------------------------- | ----- | -------------------------------------------------------------- |
+| `--token <token>`           | `-t`  | Quake API token (default: `QUAKE_TOKEN` env).                  |
+| `--query <query>`           | `-q`  | Quake query (default: `response:"/iptv/live/" AND country:"China"`). |
+| `--start <n>`               | —     | Start offset (default: `0`).                                   |
+| `--size <n>`                | —     | Page size (default: `100`).                                    |
+| `--max <n>`                 | —     | Max records to fetch (default: `100`). Each record costs Quake credits. |
+| `--max-pages <n>`           | —     | Max number of requests (default: unlimited).                   |
+| `--raw-output-path <path>`  | `-r`  | Also save the raw Quake result to this path.                   |
+| `--output-json-path <path>` | `-o`  | Path to output tv_service.json (default: `tv_service.json`).   |
+
+Or parse Quake results saved to disk (multiple files are merged and deduplicated):
+
+```bash
+sgen parse-quake-json -i ./page1.json,./page2.json -o ./tv_service.json
+```
+
+The **Quake** GitHub workflow (`.github/workflows/quake.yml`) runs `sgen fetch-quake --size 100 --max-pages 1` (a single request for 100 records) on the 1st of every month and commits the updated **tv_service.json**. Add your token as the `QUAKE_TOKEN` repository secret to enable it.
+
 ## Use as a JavaScript / TypeScript library
 
 Install in your project:

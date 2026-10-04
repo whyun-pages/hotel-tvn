@@ -32,7 +32,8 @@
 	"keywords": [
 		"hotel-tv",
 		"iptv",
-		"censys"
+		"censys",
+		"quake"
 	],
 	"scripts": {
 		"start": "tsx main.ts",
