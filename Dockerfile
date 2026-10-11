@@ -51,7 +51,7 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
 
 FROM yunnysunny/node AS prod-deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --production
 
 FROM prod-deps AS builder
