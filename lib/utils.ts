@@ -19,7 +19,8 @@ function createTimeoutSignal(timeout: number) {
   }
 
   const controller = new AbortControllerCtor();
-  setTimeout(() => controller.abort(), timeout);
+  const timer = setTimeout(() => controller.abort(), timeout);
+  timer.unref?.();
   return controller.signal;
 }
 
