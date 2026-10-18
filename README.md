@@ -228,10 +228,16 @@ You can paste the **lives.m3u** URL into an IPTV app, or open **lives.txt** in a
 | `CONCURRENCY_JSON`   | Concurrency for JSON URL checks.                                               |
 | `CONCURRENCY_STREAM` | Concurrency for stream speed tests.                                            |
 | `MIN_RATIO_TOLERANCE` | Minimum accepted `timeRatio` for a stream test (default: `0.99`). A channel is skipped when `timeRatio` is lower than this threshold. |
+| `DEEP_CHECK_SEGMENTS` | Number of consecutive `.ts` segments downloaded per stream test (default: `3`). |
 
 The scheduled task reads `schedule-config.json` generated from these variables (you can generate this config at container startup if needed).
 
-`timeRatio` is calculated as `segmentDuration / downloadDuration`. A larger value means the stream segment downloads faster relative to its playback duration and is therefore smoother to play.
+A stream test works as follows:
+
+1. Fetch the `.m3u8` playlist and take `DEEP_CHECK_SEGMENTS` consecutive segments ending at the second-to-last one (the newest segment may still be being written, the oldest ones are often cached).
+2. Download the segments one by one. Each download times out after `segmentDuration / MIN_RATIO_TOLERANCE * 1.2` seconds (at least 5 s), and `timeRatio = segmentDuration / downloadDuration` is recorded per segment.
+3. The median `timeRatio` is compared against `MIN_RATIO_TOLERANCE`. A larger value means the stream segment downloads faster relative to its playback duration and is therefore smoother to play.
+4. For live playlists, the `.m3u8` is fetched again after at least one target duration has elapsed. The channel is rejected if `#EXT-X-MEDIA-SEQUENCE` (or the last segment) has not advanced, which filters out sources whose encoder has stopped but still serve a stale playlist.
 
 - Increase `MIN_RATIO_TOLERANCE` to make filtering stricter and keep only smoother streams.
 - Decrease `MIN_RATIO_TOLERANCE` to allow slower streams that may still be playable.

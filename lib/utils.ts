@@ -216,65 +216,195 @@ export async function fetchAndParseJson(url: string): Promise<ParsedChannel[]> {
 }
 
 /**
- * 测试单个直播源的速度
+ * 直播源深度检测的采样分片数（从倒数第二个分片往前取）
+ */
+const DEEP_CHECK_SEGMENTS = Number(process.env.DEEP_CHECK_SEGMENTS) || 3;
+/**
+ * 单个分片下载超时的下限，实际超时按分片时长动态放大
+ */
+const DOWNLOAD_TIMEOUT_MIN = DOWNLOAD_TIMEOUT;
+/**
+ * 等待 m3u8 列表前进的最长时间
+ */
+const PLAYLIST_ADVANCE_WAIT_MAX = 10000;
+
+interface PlaylistSegment {
+  url: string;
+  duration?: number;
+}
+
+export interface ParsedPlaylist {
+  segments: PlaylistSegment[];
+  mediaSequence?: number;
+  targetDuration?: number;
+  isLive: boolean;
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+function median(values: number[]) {
+  if (values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+export function parseM3u8(text: string, baseUrl: string): ParsedPlaylist {
+  const playlist: ParsedPlaylist = { segments: [], isLive: true };
+  let pendingDuration: number | undefined;
+
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (!line) {
+      continue;
+    }
+
+    if (line.startsWith('#EXTINF:')) {
+      const durationText = line.slice('#EXTINF:'.length).split(',')[0]?.trim();
+      const parsedDuration = Number.parseFloat(durationText);
+      pendingDuration = Number.isFinite(parsedDuration) ? parsedDuration : undefined;
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-MEDIA-SEQUENCE:')) {
+      const seq = Number.parseInt(line.slice('#EXT-X-MEDIA-SEQUENCE:'.length).trim(), 10);
+      if (Number.isFinite(seq)) {
+        playlist.mediaSequence = seq;
+      }
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-TARGETDURATION:')) {
+      const target = Number.parseFloat(line.slice('#EXT-X-TARGETDURATION:'.length).trim());
+      if (Number.isFinite(target)) {
+        playlist.targetDuration = target;
+      }
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-ENDLIST')) {
+      playlist.isLive = false;
+      continue;
+    }
+
+    if (line.startsWith('#')) {
+      continue;
+    }
+
+    playlist.segments.push({
+      url: new URL(line, baseUrl).toString(),
+      duration: pendingDuration,
+    });
+    pendingDuration = undefined;
+  }
+
+  return playlist;
+}
+
+async function fetchPlaylist(url: string): Promise<ParsedPlaylist> {
+  const res = await fetchWithTimeout(url, undefined, 1500);
+  if (res.status !== 200) {
+    throw new Error('m3u8 failed');
+  }
+  return parseM3u8(await res.text(), url);
+}
+
+/**
+ * 判断第二次拉取的 m3u8 相对第一次是否有前进（直播源仍在持续产流）
+ */
+function hasPlaylistAdvanced(before: ParsedPlaylist, after: ParsedPlaylist) {
+  if (before.mediaSequence !== undefined && after.mediaSequence !== undefined) {
+    return after.mediaSequence > before.mediaSequence;
+  }
+  const lastBefore = before.segments[before.segments.length - 1]?.url;
+  const lastAfter = after.segments[after.segments.length - 1]?.url;
+  return lastBefore !== lastAfter;
+}
+
+/**
+ * 深度检测单个直播源
+ * 处理流程：
+ * 1. 拉取 m3u8，从倒数第二个分片往前连续取 DEEP_CHECK_SEGMENTS 个分片
+ * 2. 逐个下载分片，超时按分片时长动态计算，记录每个分片的时间比
+ * 3. 取时间比的中位数与 MIN_RATIO_TOLERANCE 比较
+ * 4. 直播列表等待至少一个分片时长后再拉一次 m3u8，确认列表有前进
  */
 export async function testStreamSpeed(channel: ParsedChannel): Promise<Channel | null> {
   const { name, url } = channel;
 
   try {
-    const m3u8Res = await fetchWithTimeout(url, undefined, 1500);
-    if (m3u8Res.status !== 200) {
-      throw new Error('m3u8 failed');
-    }
+    const startedAt = Date.now();
+    const playlist = await fetchPlaylist(url);
 
-    let firstTsFile = '';
-    let segmentDuration: number | undefined;
-    let pendingDuration: number | undefined;
-
-    const m3u8Text = await m3u8Res.text();
-    for (const rawLine of m3u8Text.split('\n')) {
-      const line = rawLine.trim();
-      if (!line) {
-        continue;
-      }
-
-      if (line.startsWith('#EXTINF:')) {
-        const durationText = line.slice('#EXTINF:'.length).split(',')[0]?.trim();
-        const parsedDuration = Number.parseFloat(durationText);
-        pendingDuration = Number.isFinite(parsedDuration) ? parsedDuration : undefined;
-        continue;
-      }
-
-      if (!line.startsWith('#')) {
-        // 取到第一个非注释行即第一个 ts 文件
-        firstTsFile = line;
-        segmentDuration = pendingDuration;
-        break;
-      }
-    }
-
-    if (!firstTsFile) {
+    if (playlist.segments.length === 0) {
       throw new Error('no ts');
     }
-    const firstTs = new URL(firstTsFile, url).toString();
 
-    const start = Date.now();
-    const tsRes = await fetchWithTimeout(firstTs, undefined, DOWNLOAD_TIMEOUT);
-    const duration = (Date.now() - start) / 1000;
+    // 倒数第二个分片最接近直播边缘，又不至于还在写入中
+    const endIndex = playlist.segments.length >= 2 ? playlist.segments.length - 2 : 0;
+    const startIndex = Math.max(0, endIndex - DEEP_CHECK_SEGMENTS + 1);
+    const samples = playlist.segments.slice(startIndex, endIndex + 1);
 
-    if (duration < 0.05) {
-      throw new Error('too fast');
+    const ratios: number[] = [];
+    const segmentDurations: number[] = [];
+    let totalSizeKB = 0;
+    let totalSeconds = 0;
+
+    for (const segment of samples) {
+      const timeout = segment.duration
+        ? Math.max(DOWNLOAD_TIMEOUT_MIN, (segment.duration / MIN_RATIO_TOLERANCE) * 1.2 * 1000)
+        : DOWNLOAD_TIMEOUT_MIN;
+
+      const start = Date.now();
+      const tsRes = await fetchWithTimeout(segment.url, undefined, timeout);
+      const sizeKB = (await tsRes.arrayBuffer()).byteLength / 1024;
+      const duration = (Date.now() - start) / 1000;
+
+      if (duration < 0.05) {
+        throw new Error('too fast');
+      }
+
+      totalSizeKB += sizeKB;
+      totalSeconds += duration;
+      ratios.push(segment.duration ? segment.duration / duration : 0);
+      if (segment.duration) {
+        segmentDurations.push(segment.duration);
+      }
     }
 
-    const sizeKB = (await tsRes.arrayBuffer()).byteLength / 1024;
-    const speedMBps = (sizeKB / duration / 1024).toFixed(2);
-    const timeRatio = segmentDuration ? segmentDuration / duration : 0;
+    const timeRatio = median(ratios);
+    const segmentDuration = segmentDurations.length ? median(segmentDurations) : undefined;
+    const speedMBps = (totalSizeKB / totalSeconds / 1024).toFixed(2);
+
     if (timeRatio < MIN_RATIO_TOLERANCE) {
       console.warn(
         `频道 ${name} 的 ts 播放过于卡顿，时间比 ${timeRatio.toFixed(2)} 低于容忍阈值 ${MIN_RATIO_TOLERANCE}，已跳过`
       );
       return null;
     }
+
+    if (playlist.isLive) {
+      const lastSegment = playlist.segments[playlist.segments.length - 1];
+      const refreshSeconds =
+        playlist.targetDuration ?? lastSegment.duration ?? segmentDuration ?? 0;
+      const waitMs = Math.min(
+        PLAYLIST_ADVANCE_WAIT_MAX,
+        refreshSeconds * 1000 - (Date.now() - startedAt)
+      );
+      if (waitMs > 0) {
+        await sleep(waitMs);
+      }
+
+      const refreshed = await fetchPlaylist(url);
+      if (!hasPlaylistAdvanced(playlist, refreshed)) {
+        throw new Error('playlist not advancing');
+      }
+    }
+
     return { name, url, speed: speedMBps, segmentDuration, timeRatio: timeRatio.toFixed(2) };
   } catch (err) {
     if (err instanceof Error) {
