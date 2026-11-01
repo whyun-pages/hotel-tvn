@@ -1,88 +1,28 @@
 [
   {
-    "baseUrl": "http://120.237.39.10:9901",
-    "province": "广东省",
-    "city": "梅州市"
+    "baseUrl": "http://116.11.165.206:8181",
+    "province": "广西壮族自治区",
+    "city": "玉林市"
   },
   {
-    "baseUrl": "http://171.8.231.190:9901",
-    "province": "河南省",
-    "city": "三门峡市"
+    "baseUrl": "http://111.59.24.227:8181",
+    "province": "广西壮族自治区",
+    "city": "贵港市"
   },
   {
-    "baseUrl": "http://139.214.181.84:9901",
-    "province": "吉林省",
-    "city": "松原市"
+    "baseUrl": "http://180.142.178.74:8181",
+    "province": "广西壮族自治区",
+    "city": "贵港市"
   },
   {
-    "baseUrl": "http://39.165.150.207:19901",
-    "province": "河南省",
-    "city": "信阳市"
+    "baseUrl": "http://110.72.80.231:8181",
+    "province": "广西壮族自治区",
+    "city": "贵港市"
   },
   {
-    "baseUrl": "http://125.93.74.27:9002",
-    "province": "广东省",
-    "city": "东莞市"
-  },
-  {
-    "baseUrl": "http://111.33.88.123:9901",
-    "province": "天津市",
-    "city": "天津市"
-  },
-  {
-    "baseUrl": "http://222.89.112.215:9902",
-    "province": "河南省",
-    "city": "开封市"
-  },
-  {
-    "baseUrl": "http://139.214.183.177:9901",
-    "province": "吉林省",
-    "city": "松原市"
-  },
-  {
-    "baseUrl": "http://175.0.78.167:9999",
-    "province": "湖南省",
-    "city": "长沙市"
-  },
-  {
-    "baseUrl": "http://120.198.86.251:9901",
-    "province": "广东省",
-    "city": "梅州市"
-  },
-  {
-    "baseUrl": "http://221.221.137.78:8000",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://218.13.139.26:9901",
-    "province": "广东省",
-    "city": "佛山市"
-  },
-  {
-    "baseUrl": "http://223.14.160.166:9901",
-    "province": "山西省",
-    "city": "太原市"
-  },
-  {
-    "baseUrl": "http://120.238.87.243:9901",
-    "province": "广东省",
-    "city": "梅州市"
-  },
-  {
-    "baseUrl": "http://119.39.9.8:9901",
-    "province": "湖南省",
-    "city": "长沙市"
-  },
-  {
-    "baseUrl": "http://59.39.89.130:60901",
-    "province": "广东省",
-    "city": "阳江市"
-  },
-  {
-    "baseUrl": "http://221.232.197.162:7777",
-    "province": "湖北省",
-    "city": "武汉市"
+    "baseUrl": "http://110.72.81.193:8181",
+    "province": "广西壮族自治区",
+    "city": "贵港市"
   },
   {
     "baseUrl": "http://183.239.248.218:8181",
@@ -90,39 +30,44 @@
     "city": "湛江市"
   },
   {
-    "baseUrl": "http://183.255.71.108:9901",
-    "province": "海南省",
-    "city": "三亚市"
-  },
-  {
-    "baseUrl": "http://112.99.195.122:65000",
-    "province": "黑龙江省",
-    "city": "双鸭山市"
-  },
-  {
-    "baseUrl": "http://101.66.198.62:9901",
-    "province": "浙江省",
-    "city": "舟山市"
-  },
-  {
-    "baseUrl": "http://101.66.195.51:9901",
-    "province": "浙江省",
-    "city": "舟山市"
-  },
-  {
-    "baseUrl": "http://101.66.198.121:9901",
-    "province": "浙江省",
-    "city": "舟山市"
-  },
-  {
-    "baseUrl": "http://111.59.139.82:11888",
+    "baseUrl": "http://110.72.102.16:8181",
     "province": "广西壮族自治区",
-    "city": "玉林市"
+    "city": "贵港市"
   },
   {
-    "baseUrl": "http://120.27.63.14:30006",
-    "province": "山东省",
-    "city": "青岛市"
+    "baseUrl": "http://121.19.134.33:808",
+    "province": "河北省",
+    "city": "保定市"
+  },
+  {
+    "baseUrl": "http://175.0.71.18:8088",
+    "province": "湖南省",
+    "city": "长沙市"
+  },
+  {
+    "baseUrl": "http://101.66.198.84:9901",
+    "province": "浙江省",
+    "city": "舟山市"
+  },
+  {
+    "baseUrl": "http://101.66.195.232:9901",
+    "province": "浙江省",
+    "city": "舟山市"
+  },
+  {
+    "baseUrl": "http://183.223.157.33:9901",
+    "province": "四川省",
+    "city": "南充市"
+  },
+  {
+    "baseUrl": "http://119.39.9.8:9901",
+    "province": "湖南省",
+    "city": "长沙市"
+  },
+  {
+    "baseUrl": "http://112.30.73.119:9991",
+    "province": "安徽省",
+    "city": "阜阳市"
   },
   {
     "baseUrl": "http://112.31.94.31:9902",
@@ -130,194 +75,29 @@
     "city": "阜阳市"
   },
   {
-    "baseUrl": "http://118.193.115.2:9901",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://153.0.171.163:9901",
-    "province": "海南省",
-    "city": "三亚市"
-  },
-  {
-    "baseUrl": "http://175.9.104.141:9002",
-    "province": "湖南省",
-    "city": "长沙市"
-  },
-  {
-    "baseUrl": "http://112.123.243.37:50085",
-    "province": "安徽省",
-    "city": "黄山市"
-  },
-  {
-    "baseUrl": "http://112.234.22.76:9901",
-    "province": "山东省",
-    "city": "临沂市"
-  },
-  {
-    "baseUrl": "http://59.153.167.111:9901",
-    "province": "湖北省",
-    "city": "十堰市"
-  },
-  {
-    "baseUrl": "http://1.192.153.56:9901",
-    "province": "河南省",
-    "city": "濮阳市"
-  },
-  {
-    "baseUrl": "http://101.66.195.33:9901",
+    "baseUrl": "http://101.66.198.184:9901",
     "province": "浙江省",
     "city": "舟山市"
   },
   {
-    "baseUrl": "http://119.125.134.235:9901",
-    "province": "广东省",
-    "city": "梅州市"
+    "baseUrl": "http://101.66.194.176:9901",
+    "province": "浙江省",
+    "city": "舟山市"
   },
   {
-    "baseUrl": "http://221.13.235.202:9901",
+    "baseUrl": "http://221.232.196.38:7777",
+    "province": "湖北省",
+    "city": "武汉市"
+  },
+  {
+    "baseUrl": "http://111.4.82.49:8008",
+    "province": "湖北省",
+    "city": "武汉市"
+  },
+  {
+    "baseUrl": "http://1.192.15.122:9901",
     "province": "河南省",
-    "city": "安阳市"
-  },
-  {
-    "baseUrl": "http://120.198.86.186:9901",
-    "province": "广东省",
-    "city": "梅州市"
-  },
-  {
-    "baseUrl": "http://219.145.93.74:10000",
-    "province": "陕西省",
-    "city": "西安市"
-  },
-  {
-    "baseUrl": "http://123.112.183.210:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://111.194.226.229:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://123.115.137.243:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://111.194.225.79:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://222.128.50.144:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://125.34.16.220:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://114.248.31.46:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://111.196.66.229:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://125.33.0.17:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://202.168.187.221:9999",
-    "province": "广东省",
-    "city": "广州市"
-  },
-  {
-    "baseUrl": "http://125.33.1.194:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://111.194.228.90:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://114.252.254.242:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://111.194.37.51:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://125.33.9.57:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://114.252.252.173:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://221.221.18.163:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://114.248.3.152:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://103.39.222.35:9999",
-    "province": "广东省",
-    "city": "深圳市"
-  },
-  {
-    "baseUrl": "http://114.252.250.246:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://180.159.73.219:9999",
-    "province": "上海市",
-    "city": "上海市"
-  },
-  {
-    "baseUrl": "http://1.205.159.59:9999",
-    "province": "贵州省",
-    "city": "遵义市"
-  },
-  {
-    "baseUrl": "http://123.120.5.245:9999",
-    "province": "北京市",
-    "city": "北京市"
-  },
-  {
-    "baseUrl": "http://124.152.247.189:21375",
-    "province": "甘肃省",
-    "city": "兰州市"
-  },
-  {
-    "baseUrl": "http://139.214.181.125:9901",
-    "province": "吉林省",
-    "city": "松原市"
-  },
-  {
-    "baseUrl": "http://221.220.128.25:9998",
-    "province": "北京市",
-    "city": "北京市"
+    "city": "三门峡市"
   },
   {
     "baseUrl": "http://58.57.40.22:9901",
@@ -325,13 +105,298 @@
     "city": "临沂市"
   },
   {
-    "baseUrl": "http://120.70.60.179:9901",
-    "province": "新疆维吾尔自治区",
-    "city": "伊犁哈萨克自治州"
+    "baseUrl": "http://47.104.249.123:3000",
+    "province": "山东省",
+    "city": "青岛市"
   },
   {
-    "baseUrl": "http://42.237.82.75:9901",
+    "baseUrl": "http://111.33.88.123:9901",
+    "province": "天津市",
+    "city": "天津市"
+  },
+  {
+    "baseUrl": "http://183.234.143.5:5555",
+    "province": "广东省",
+    "city": "茂名市"
+  },
+  {
+    "baseUrl": "http://111.59.139.85:11888",
+    "province": "广西壮族自治区",
+    "city": "玉林市"
+  },
+  {
+    "baseUrl": "http://111.4.59.41:60901",
+    "province": "湖北省",
+    "city": "荆州市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7316",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://202.96.141.110:57627",
+    "province": "广东省",
+    "city": "湛江市"
+  },
+  {
+    "baseUrl": "http://59.173.174.118:9902",
+    "province": "湖北省",
+    "city": "武汉市"
+  },
+  {
+    "baseUrl": "http://58.58.152.178:9902",
+    "province": "山东省",
+    "city": "菏泽市"
+  },
+  {
+    "baseUrl": "http://124.90.45.52:50080",
+    "province": "浙江省",
+    "city": "杭州市"
+  },
+  {
+    "baseUrl": "http://113.15.109.216:59901",
+    "province": "广西壮族自治区",
+    "city": "河池市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7066",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://183.234.143.5:7711",
+    "province": "广东省",
+    "city": "茂名市"
+  },
+  {
+    "baseUrl": "http://120.234.26.21:18282",
+    "province": "广东省",
+    "city": "深圳市"
+  },
+  {
+    "baseUrl": "http://112.123.243.37:50085",
+    "province": "安徽省",
+    "city": "黄山市"
+  },
+  {
+    "baseUrl": "http://183.234.143.5:19902",
+    "province": "广东省",
+    "city": "茂名市"
+  },
+  {
+    "baseUrl": "http://36.35.16.98:9902",
+    "province": "安徽省",
+    "city": "合肥市"
+  },
+  {
+    "baseUrl": "http://113.200.148.203:9903",
+    "province": "陕西省",
+    "city": "西安市"
+  },
+  {
+    "baseUrl": "http://39.150.102.131:19901",
     "province": "河南省",
-    "city": "濮阳市"
+    "city": "驻马店市"
+  },
+  {
+    "baseUrl": "http://60.188.21.28:59902",
+    "province": "浙江省",
+    "city": "湖州市"
+  },
+  {
+    "baseUrl": "http://49.87.154.246:10091",
+    "province": "江苏省",
+    "city": "淮安市"
+  },
+  {
+    "baseUrl": "http://124.152.247.189:21375",
+    "province": "甘肃省",
+    "city": "兰州市"
+  },
+  {
+    "baseUrl": "http://116.128.243.121:9902",
+    "province": "湖南省",
+    "city": "长沙市"
+  },
+  {
+    "baseUrl": "http://49.232.164.156:8300",
+    "province": "北京市",
+    "city": "北京市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7027",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://183.238.213.11:18282",
+    "province": "广东省",
+    "city": "深圳市"
+  },
+  {
+    "baseUrl": "http://111.53.59.52:9902",
+    "province": "山西省",
+    "city": "吕梁市"
+  },
+  {
+    "baseUrl": "http://61.143.15.139:59901",
+    "province": "广东省",
+    "city": "江门市"
+  },
+  {
+    "baseUrl": "http://122.227.166.86:39902",
+    "province": "浙江省",
+    "city": "宁波市"
+  },
+  {
+    "baseUrl": "http://111.59.139.82:11888",
+    "province": "广西壮族自治区",
+    "city": "玉林市"
+  },
+  {
+    "baseUrl": "http://219.159.91.10:8801",
+    "province": "广西壮族自治区",
+    "city": "桂林市"
+  },
+  {
+    "baseUrl": "http://39.164.143.66:9903",
+    "province": "河南省",
+    "city": "郑州市"
+  },
+  {
+    "baseUrl": "http://112.27.145.212:9902",
+    "province": "安徽省",
+    "city": "阜阳市"
+  },
+  {
+    "baseUrl": "http://43.224.248.29:9902",
+    "province": "香港",
+    "city": "香港"
+  },
+  {
+    "baseUrl": "http://49.233.168.63:21899",
+    "province": "北京市",
+    "city": "北京市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7045",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://171.125.39.121:29901",
+    "province": "山西省",
+    "city": "忻州市"
+  },
+  {
+    "baseUrl": "http://218.13.138.139:59901",
+    "province": "广东省",
+    "city": "佛山市"
+  },
+  {
+    "baseUrl": "http://202.96.141.110:57625",
+    "province": "广东省",
+    "city": "湛江市"
+  },
+  {
+    "baseUrl": "http://124.152.247.189:51059",
+    "province": "甘肃省",
+    "city": "兰州市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7034",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://61.138.128.226:29901",
+    "province": "吉林省",
+    "city": "吉林市"
+  },
+  {
+    "baseUrl": "http://113.26.202.52:1299",
+    "province": "山西省",
+    "city": "吕梁市"
+  },
+  {
+    "baseUrl": "http://39.165.150.207:19901",
+    "province": "河南省",
+    "city": "信阳市"
+  },
+  {
+    "baseUrl": "http://111.40.34.235:9902",
+    "province": "黑龙江省",
+    "city": "哈尔滨市"
+  },
+  {
+    "baseUrl": "http://183.0.186.108:9909",
+    "province": "广东省",
+    "city": "茂名市"
+  },
+  {
+    "baseUrl": "http://183.234.143.5:19901",
+    "province": "广东省",
+    "city": "茂名市"
+  },
+  {
+    "baseUrl": "http://113.200.148.203:9902",
+    "province": "陕西省",
+    "city": "西安市"
+  },
+  {
+    "baseUrl": "http://49.234.31.101:7150",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://124.152.247.189:8349",
+    "province": "甘肃省",
+    "city": "兰州市"
+  },
+  {
+    "baseUrl": "http://202.96.141.110:51276",
+    "province": "广东省",
+    "city": "湛江市"
+  },
+  {
+    "baseUrl": "http://223.83.203.174:9902",
+    "province": "江西省",
+    "city": "上饶市"
+  },
+  {
+    "baseUrl": "http://218.13.172.98:59901",
+    "province": "广东省",
+    "city": "佛山市"
+  },
+  {
+    "baseUrl": "http://124.152.247.189:10069",
+    "province": "甘肃省",
+    "city": "兰州市"
+  },
+  {
+    "baseUrl": "http://112.31.94.31:229",
+    "province": "安徽省",
+    "city": "阜阳市"
+  },
+  {
+    "baseUrl": "http://115.150.63.77:9902",
+    "province": "江西省",
+    "city": "赣州市"
+  },
+  {
+    "baseUrl": "http://120.253.150.222:60000",
+    "province": "上海市",
+    "city": "上海市"
+  },
+  {
+    "baseUrl": "http://124.90.45.52:9901",
+    "province": "浙江省",
+    "city": "杭州市"
+  },
+  {
+    "baseUrl": "http://218.13.139.26:9901",
+    "province": "广东省",
+    "city": "佛山市"
   }
 ]
